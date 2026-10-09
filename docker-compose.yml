@@ -1,0 +1,38 @@
+# PostgreSQL para Droopy Manuel.
+#
+# Se levanta en el puerto 2121 (no el 5432 habitual) para no chocar con el
+# PostgreSQL nativo de Windows que ya corre en esta máquina ni con los
+# contenedores de otros proyectos.
+#
+#   docker compose up -d
+#   docker compose logs -f db
+#   docker compose down          # conserva los datos
+#   docker compose down -v       # borra también los datos
+#
+# DATABASE_URL resultante:
+#   postgresql://droopy:droopy@localhost:2121/droopy_manuel
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: droopy-manuel-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: droopy
+      POSTGRES_PASSWORD: droopy
+      POSTGRES_DB: droopy_manuel
+      # Necesario para acentos y emojis; el contenido está en español.
+      POSTGRES_INITDB_ARGS: '--encoding=UTF8 --locale=C'
+    ports:
+      - '2121:5432'
+    volumes:
+      - droopy-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U droopy -d droopy_manuel']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  droopy-db-data:
+    name: droopy-manuel-db-data

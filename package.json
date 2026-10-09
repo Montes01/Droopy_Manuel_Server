@@ -1,0 +1,44 @@
+{
+	"name": "droopy-manuel-server",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"start": "node --env-file=.env dist/index.js",
+		"dev": "tsc -p tsconfig.json && node --env-file=.env dist/index.js",
+		"dev:watch": "tsc -p tsconfig.json --watch",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"db:up": "docker compose up -d",
+		"db:down": "docker compose down",
+		"db:generate": "node --env-file=.env node_modules/drizzle-kit/bin.cjs generate",
+		"db:migrate": "node --env-file=.env node_modules/drizzle-kit/bin.cjs migrate",
+		"db:push": "node --env-file=.env node_modules/drizzle-kit/bin.cjs push",
+		"db:studio": "node --env-file=.env node_modules/drizzle-kit/bin.cjs studio",
+		"db:seed": "npm run build && node --env-file=.env dist/db/seed.js",
+		"db:reset": "npm run build && node --env-file=.env tests/reset-db.mjs",
+		"test": "npm run build && npm run db:reset && node --env-file=.env tests/db.mjs && node --env-file=.env tests/admin.mjs && node --env-file=.env tests/admin-content.mjs && node --env-file=.env tests/smoke.mjs && npm run test:integration && npm run test:http:auto",
+		"test:api": "node --env-file=.env tests/smoke.mjs",
+		"test:admin": "npm run build && node --env-file=.env tests/admin.mjs",
+		"test:admin:content": "npm run build && node --env-file=.env tests/admin-content.mjs",
+		"test:db": "npm run build && npm run db:reset && node --env-file=.env tests/db.mjs",
+		"test:http": "node --env-file=.env tests/e2e-http.mjs",
+		"test:http:auto": "node --env-file=.env tests/e2e-http-auto.mjs",
+		"test:integration": "node scripts/build-front-for-test.mjs && node --env-file=.env tests/integration.mjs",
+		"clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('test-build',{recursive:true,force:true})\""
+	},
+	"dependencies": {
+		"bcryptjs": "^3.0.3",
+		"cors": "^2.8.6",
+		"drizzle-orm": "^0.45.3",
+		"express": "^5.2.1",
+		"postgres": "^3.4.9"
+	},
+	"devDependencies": {
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.6",
+		"@types/node": "^24.10.1",
+		"drizzle-kit": "^0.31.11",
+		"typescript": "^6.0.3"
+	}
+}
