@@ -3,6 +3,7 @@ import dogsAdminRouter from './dogs.js';
 import shopAdminRouter from './shop.js';
 import newsAdminRouter from './news.js';
 import siteAdminRouter from './site.js';
+import ordersAdminRouter from './orders.js';
 
 /**
  * Rutas del panel de administración.
@@ -19,5 +20,6 @@ router.use('/dogs', dogsAdminRouter);
 router.use('/shop', shopAdminRouter);
 router.use('/news', newsAdminRouter);
 router.use('/site', siteAdminRouter);
+router.use('/orders', ordersAdminRouter);
 
 export default router;

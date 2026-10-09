@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, count, desc, eq, or, sql } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { orderLines, orders, shopItems, shopVariants } from '../db/schema/index.js';
 import type {
@@ -296,6 +296,61 @@ async function assembleOrder(row: typeof orders.$inferSelect): Promise<Order> {
 export async function getAllOrders(): Promise<Order[]> {
 	const rows = await db.select().from(orders).orderBy(desc(orders.createdAt), desc(orders.id));
 	return Promise.all(rows.map(assembleOrder));
+}
+
+/** Filtros que acepta el listado del panel. */
+export interface OrderFilters {
+	status?: OrderStatus;
+	paymentStatus?: PaymentStatus;
+	/** Busca en número de pedido, correo y nombre del cliente. */
+	q?: string;
+	limit?: number;
+	offset?: number;
+}
+
+/**
+ * Pedidos con filtros, para el panel.
+ *
+ * Devuelve también el total sin paginar, para que la interfaz pueda mostrar
+ * «12 de 40» sin traerse todo.
+ */
+export async function findOrders(
+	filters: OrderFilters = {}
+): Promise<{ orders: Order[]; total: number }> {
+	const conditions = [];
+
+	if (filters.status) conditions.push(eq(orders.status, filters.status));
+	if (filters.paymentStatus) conditions.push(eq(orders.paymentStatus, filters.paymentStatus));
+
+	if (filters.q) {
+		// Búsqueda simple por texto: número, correo o nombre.
+		const term = `%${filters.q.trim().toLowerCase()}%`;
+		conditions.push(
+			or(
+				sql`lower(${orders.orderNumber}) like ${term}`,
+				sql`lower(${orders.customerEmail}) like ${term}`,
+				sql`lower(${orders.customerNombres}) like ${term}`,
+				sql`lower(${orders.customerApellidos}) like ${term}`
+			)
+		);
+	}
+
+	const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+	const rows = await db
+		.select()
+		.from(orders)
+		.where(where)
+		.orderBy(desc(orders.createdAt), desc(orders.id))
+		.limit(filters.limit ?? 50)
+		.offset(filters.offset ?? 0);
+
+	const [counted] = await db.select({ total: count() }).from(orders).where(where);
+
+	return {
+		orders: await Promise.all(rows.map(assembleOrder)),
+		total: counted?.total ?? 0
+	};
 }
 
 /** Cambia el estado de un pedido (para el panel). */
