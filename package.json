@@ -26,6 +26,8 @@
 		"test:http": "node --env-file=.env tests/e2e-http.mjs",
 		"test:http:auto": "node --env-file=.env tests/e2e-http-auto.mjs",
 		"test:integration": "node scripts/build-front-for-test.mjs && node --env-file=.env tests/integration.mjs",
+		"test:panel": "node tests/admin-panel.mjs",
+		"test:all": "npm run test && npm run test:panel",
 		"clean": "node -e \"fs.rmSync('dist',{recursive:true,force:true});fs.rmSync('test-build',{recursive:true,force:true})\""
 	},
 	"dependencies": {
