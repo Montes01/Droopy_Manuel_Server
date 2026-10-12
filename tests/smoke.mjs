@@ -66,10 +66,18 @@ try {
 	);
 
 	const alivePack = await get('/api/dogs/pack?view=alive');
+	const alive = alivePack.body ?? [];
+	const vivos = (dogs.body ?? []).filter((d) => d.status !== 'en-memoria');
 	check(
-		'la manada viva respeta el orden curado',
-		alivePack.body?.map((d) => d.slug).join(',') === 'toby,luna,thor,chiquis',
-		alivePack.body?.map((d) => d.slug).join(',')
+		'la manada viva = todos salvo el cielo',
+		alive.length === vivos.length &&
+			vivos.every((d) => alive.some((a) => a.slug === d.slug)),
+		`alive=${alive.length} vivos=${vivos.length}`
+	);
+	check(
+		'la manada viva no trae perritos en-memoria',
+		alive.every((d) => d.status !== 'en-memoria'),
+		alive.map((d) => `${d.slug}:${d.status}`).join(',')
 	);
 
 	const dog = await get('/api/dogs/luna');
@@ -142,9 +150,11 @@ try {
 
 	const targets = await get('/api/site/donation-targets');
 	check(
-		'GET /api/site/donation-targets',
-		Array.isArray(targets.body) && targets.body.length === 4 && targets.body[0].dog?.slug === 'toby',
-		`len=${targets.body?.length}`
+		'GET /api/site/donation-targets = manada viva',
+		Array.isArray(targets.body) &&
+			targets.body.length === alive.length &&
+			targets.body.every((t) => t.dog && alive.some((a) => a.slug === t.dog.slug)),
+		`len=${targets.body?.length} alive=${alive.length}`
 	);
 
 	const accounts = await get('/api/site/bank-accounts');

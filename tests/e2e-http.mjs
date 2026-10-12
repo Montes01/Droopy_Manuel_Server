@@ -82,7 +82,7 @@ await check('GET /api/news/categories (5)', '/api/news/categories', (b) => b.len
 await check('GET /api/site/content', '/api/site/content', (b) => b.stats.rescued === 248);
 await check('GET /api/site/donation-tiers (4)', '/api/site/donation-tiers', (b) => b.length === 4);
 await check('GET /api/site/testimonials (4)', '/api/site/testimonials', (b) => b.length === 4);
-await check('GET /api/site/donation-targets (4)', '/api/site/donation-targets', (b) => b.length === 4);
+await check('GET /api/site/donation-targets (vivos)', '/api/site/donation-targets', (b) => Array.isArray(b) && b.length === 12 && b.every((t) => t.dog && t.dog.status !== 'en-memoria'));
 await check('GET /api/site/bank-accounts (4)', '/api/site/bank-accounts', (b) => b.length === 4);
 await check(
 	'GET /api/site/contact',

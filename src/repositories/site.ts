@@ -19,13 +19,12 @@ import type {
 } from '../types.js';
 import {
 	toBankAccount,
-	toDonationTarget,
 	toDonationTier,
 	toSiteContact,
 	toSiteContent,
 	toTestimonial
 } from './mappers.js';
-import { getDogsBySlugs } from './dogs.js';
+import { getAlivePack } from './dogs.js';
 
 /**
  * Acceso al contenido del sitio: estadísticas, contacto, donaciones.
@@ -101,25 +100,27 @@ export async function getBankAccounts(): Promise<BankAccount[]> {
 /**
  * Perritos a los que se puede dirigir una donación, con su meta si la tienen.
  *
- * La tabla solo guarda el slug y la meta; el perrito se carga aparte para
- * devolver el `Dog` completo que espera el frontend.
+ * Son los mismos de la manada viva (/manada): todo perrito que se agregue
+ * desde el panel aparece aquí solo. La tabla `donation_targets` solo aporta
+ * extras: `goalCents` cuando hay meta y `active = false` para ocultar a un
+ * perrito sin borrarlo.
  */
 export async function getDonationTargets(): Promise<DonationTarget[]> {
-	const rows = await db
-		.select()
-		.from(donationTargets)
-		.where(eq(donationTargets.active, true))
-		.orderBy(asc(donationTargets.sortOrder), asc(donationTargets.id));
+	const [pack, rows] = await Promise.all([
+		getAlivePack(),
+		db.select().from(donationTargets)
+	]);
 
-	if (rows.length === 0) return [];
+	const hidden = new Set(rows.filter((row) => !row.active).map((row) => row.dogSlug));
+	const goals = new Map(
+		rows
+			.filter((row) => row.active && row.goalCents !== null)
+			.map((row) => [row.dogSlug, row.goalCents as number])
+	);
 
-	const dogs = await getDogsBySlugs(rows.map((row) => row.dogSlug));
-	const bySlug = new Map(dogs.map((dog) => [dog.slug, dog]));
-
-	return rows
-		.map((row) => {
-			const dog = bySlug.get(row.dogSlug);
-			return dog ? toDonationTarget(row, dog) : null;
-		})
-		.filter((target): target is DonationTarget => target !== null);
+	return pack
+		.filter((dog) => !hidden.has(dog.slug))
+		.map((dog) =>
+			goals.has(dog.slug) ? { dog, goalCents: goals.get(dog.slug)! } : { dog }
+		);
 }

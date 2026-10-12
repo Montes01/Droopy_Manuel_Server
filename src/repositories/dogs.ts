@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from 'drizzle-orm';
+import { asc, eq, inArray, ne } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { dogs } from '../db/schema/index.js';
 import type { Dog, DogStatus, PackView, Slug } from '../types.js';
@@ -53,16 +53,18 @@ export async function getDogsByStatus(status: DogStatus): Promise<Dog[]> {
 }
 
 /**
- * Slugs de la manada viva, en orden de presentación.
+ * La manada viva: todos los perritos salvo los que están en el cielo.
  *
- * Sigue siendo una selección curada: son los que aparecen en /manada, no todos
- * los que están en adopción. Se resuelve con la columna `sort_order` para que
- * el panel pueda reordenarlos.
+ * Se deriva de `status`, igual que el cielo: cualquier perrito que se agregue
+ * desde el panel aparece aquí solo, en el orden fijado con `sort_order`.
  */
-const ALIVE_PACK_SLUGS: Slug[] = ['toby', 'luna', 'thor', 'chiquis'];
-
 export async function getAlivePack(): Promise<Dog[]> {
-	return getDogsBySlugs(ALIVE_PACK_SLUGS);
+	const rows = await db
+		.select()
+		.from(dogs)
+		.where(ne(dogs.status, 'en-memoria'))
+		.orderBy(...DOG_ORDER);
+	return rows.map(toDog);
 }
 
 /**
@@ -77,9 +79,4 @@ export async function getHeavenPack(): Promise<Dog[]> {
 
 export async function getPack(view: PackView): Promise<Dog[]> {
 	return view === 'heaven' ? getHeavenPack() : getAlivePack();
-}
-
-/** Slugs de la manada viva, para reusar en donaciones. */
-export function alivePackSlugs(): readonly Slug[] {
-	return ALIVE_PACK_SLUGS;
 }

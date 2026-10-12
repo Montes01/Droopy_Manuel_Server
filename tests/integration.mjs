@@ -173,7 +173,8 @@ try {
 
 	const alive = await dogs.getPack('alive');
 	const heaven = await dogs.getPack('heaven');
-	check('getPack("alive") → 4', alive.length === 4, `len=${alive.length}`);
+	const vivos = allDogs.filter((d) => d.status !== 'en-memoria');
+	check('getPack("alive") → todos salvo el cielo', alive.length === vivos.length, `len=${alive.length} vivos=${vivos.length}`);
 	check('getPack("heaven") → 2', heaven.length === 2, `len=${heaven.length}`);
 	check(
 		'la manada del cielo es la esperada',
@@ -181,8 +182,9 @@ try {
 		heaven.map((d) => d.slug).join(',')
 	);
 	check(
-		'la manada viva respeta el orden curado',
-		alive.map((d) => d.slug).join(',') === 'toby,luna,thor,chiquis',
+		'la manada viva trae a todos los vivos',
+		vivos.every((d) => alive.some((a) => a.slug === d.slug)) &&
+			alive.every((a) => a.status !== 'en-memoria'),
 		alive.map((d) => d.slug).join(',')
 	);
 
@@ -226,9 +228,10 @@ try {
 
 	const targets = await site.getDonationTargets();
 	check(
-		'getDonationTargets() → 4 envueltos',
-		targets.length === 4 && targets[0].dog.slug === 'toby',
-		`len=${targets.length}`
+		'getDonationTargets() = manada viva envuelta',
+		targets.length === vivos.length &&
+			targets.every((t) => vivos.some((d) => d.slug === t.dog.slug)),
+		`len=${targets.length} vivos=${vivos.length}`
 	);
 	check(
 		'cada target trae un Dog completo',
