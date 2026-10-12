@@ -36,6 +36,20 @@ export function requireString(value: unknown, field: string, max = 255): string 
 	return value.trim();
 }
 
+/**
+ * Como `requireString`, pero el campo es opcional: si falta o viene vacío
+ * devuelve `''` en vez de fallar. Así la columna puede seguir `NOT NULL`
+ * sin migración; el emoji ausente se guarda como cadena vacía.
+ */
+export function optionalString(value: unknown, field: string, max = 255): string {
+	if (value === undefined || value === null) return '';
+	const text = String(value).trim();
+	if (text.length > max) {
+		throw new ValidationError(`El campo "${field}" no puede pasar de ${max} caracteres.`);
+	}
+	return text;
+}
+
 export function requireEnum<T extends string>(value: unknown, allowed: T[], field: string): T {
 	if (typeof value !== 'string' || !allowed.includes(value as T)) {
 		throw new ValidationError(`El campo "${field}" debe ser uno de: ${allowed.join(', ')}.`);

@@ -9,7 +9,7 @@ import {
 } from '../db/schema/index.js';
 import type { BankAccount, DonationTier, PaymentMethod, Testimonial } from '../types.js';
 import { toBankAccount, toDonationTier, toTestimonial } from './mappers.js';
-import { ValidationError, requireInt, requireString, requireStringArray } from './validation.js';
+import { ValidationError, optionalString, requireInt, requireString, requireStringArray } from './validation.js';
 
 /**
  * Escritura del contenido del sitio (panel de administración).
@@ -229,7 +229,7 @@ export async function createBankAccount(input: BankAccountInput): Promise<BankAc
 		.insert(bankAccounts)
 		.values({
 			bank: requireString(input.bank, 'bank', 160),
-			emoji: requireString(input.emoji, 'emoji', 16),
+			emoji: optionalString(input.emoji, 'emoji', 16),
 			method: input.method,
 			holder: requireString(input.holder, 'holder', 255),
 			fields: buildFields(input.fields),
@@ -247,7 +247,7 @@ export async function updateBankAccount(
 ): Promise<BankAccount | undefined> {
 	const values: Record<string, unknown> = {};
 	if (input.bank !== undefined) values.bank = requireString(input.bank, 'bank', 160);
-	if (input.emoji !== undefined) values.emoji = requireString(input.emoji, 'emoji', 16);
+	if (input.emoji !== undefined) values.emoji = optionalString(input.emoji, 'emoji', 16);
 	if (input.holder !== undefined) values.holder = requireString(input.holder, 'holder', 255);
 	if (input.fields !== undefined) values.fields = buildFields(input.fields);
 	if (input.sortOrder !== undefined) values.sortOrder = requireInt(input.sortOrder, 'sortOrder');

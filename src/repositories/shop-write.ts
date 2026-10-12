@@ -3,7 +3,7 @@ import { db } from '../db/index.js';
 import { shopCategories, shopItems, shopVariants } from '../db/schema/index.js';
 import type { ShopCategory, ShopItem } from '../types.js';
 import { toShopCategory, toShopItem } from './mappers.js';
-import { ValidationError, requireEnum, requireInt, requireString, slugify } from './validation.js';
+import { ValidationError, optionalString, requireEnum, requireInt, requireString, slugify } from './validation.js';
 
 /**
  * Escritura del catálogo de la tienda (panel de administración).
@@ -65,7 +65,7 @@ export async function createCategory(input: ShopCategoryInput): Promise<ShopCate
 		.values({
 			slug,
 			name,
-			emoji: requireString(input.emoji, 'emoji', 16),
+			emoji: optionalString(input.emoji, 'emoji', 16),
 			blurb: requireString(input.blurb, 'blurb', 2000),
 			sortOrder: input.sortOrder !== undefined ? requireInt(input.sortOrder, 'sortOrder') : 0
 		})
@@ -81,7 +81,7 @@ export async function updateCategory(
 ): Promise<ShopCategory | undefined> {
 	const values: Record<string, unknown> = {};
 	if (input.name !== undefined) values.name = requireString(input.name, 'name', 120);
-	if (input.emoji !== undefined) values.emoji = requireString(input.emoji, 'emoji', 16);
+	if (input.emoji !== undefined) values.emoji = optionalString(input.emoji, 'emoji', 16);
 	if (input.blurb !== undefined) values.blurb = requireString(input.blurb, 'blurb', 2000);
 	if (input.sortOrder !== undefined) values.sortOrder = requireInt(input.sortOrder, 'sortOrder');
 
@@ -175,7 +175,7 @@ function buildItemValues(input: ShopItemInput, partial: boolean) {
 		values.details = requireString(input.details, 'details', 5000);
 	}
 	if (!partial || input.emoji !== undefined) {
-		values.emoji = requireString(input.emoji, 'emoji', 16);
+		values.emoji = optionalString(input.emoji, 'emoji', 16);
 	}
 
 	if (input.photo !== undefined) values.photo = input.photo || null;

@@ -6,6 +6,7 @@ import { toNewsItem } from './mappers.js';
 import {
 	DATE_RE,
 	ValidationError,
+	optionalString,
 	requireEnum,
 	requireString,
 	requireStringArray,
@@ -63,7 +64,7 @@ function buildValues(input: NewsInput, partial: boolean) {
 		values.category = requireEnum(input.category, CATEGORIES, 'category');
 	}
 	if (!partial || input.emoji !== undefined) {
-		values.emoji = requireString(input.emoji, 'emoji', 16);
+		values.emoji = optionalString(input.emoji, 'emoji', 16);
 	}
 
 	if (input.tags !== undefined) values.tags = requireStringArray(input.tags, 'tags');
