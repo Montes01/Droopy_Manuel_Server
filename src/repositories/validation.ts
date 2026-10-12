@@ -75,3 +75,19 @@ export function requireStringArray(value: unknown, field: string): string[] {
 
 /** Fecha ISO sencilla (YYYY-MM-DD). */
 export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Color opcional del perrito: `undefined`/`null`/vacío = sin color (el
+ * frontend usa el marrón). El panel solo lo escribe con el picker
+ * (`#rrggbb`), así que esto normaliza sin validar: lo irreconocible se
+ * guarda como sin color en vez de fallar.
+ */
+export function optionalHexColor(value: unknown, _field: string): string | null {
+	if (value === undefined || value === null) return null;
+	let text = String(value).trim();
+	if (text === '' || text === '#') return null;
+	if (text.startsWith('#')) text = text.slice(1);
+	if (!/^[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(text)) return null;
+	if (text.length === 3) text = text.replace(/./g, (char) => char + char);
+	return `#${text.toLowerCase()}`;
+}

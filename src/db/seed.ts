@@ -83,6 +83,7 @@ async function seed(): Promise<void> {
 			traits: dog.traits,
 			story: dog.story,
 			photo: dog.photo,
+			color: dog.color ?? null,
 			featured: dog.featured ?? false,
 			sortOrder: index
 		}))

@@ -7,6 +7,7 @@ import { getAllDogs } from './dogs.js';
 import {
 	DATE_RE,
 	ValidationError,
+	optionalHexColor,
 	requireEnum,
 	requireInt,
 	requireString,
@@ -40,6 +41,8 @@ export interface DogInput {
 	traits?: string[];
 	story?: string;
 	photo?: string | null;
+	/** Hex `#rrggbb` o null para volver al marrón. Opcional. */
+	color?: string | null;
 	featured?: boolean;
 	sortOrder?: number;
 }
@@ -103,6 +106,7 @@ function buildValues(input: DogInput, partial: boolean) {
 	if (input.sterilized !== undefined) values.sterilized = Boolean(input.sterilized);
 	if (input.featured !== undefined) values.featured = Boolean(input.featured);
 	if (input.photo !== undefined) values.photo = input.photo || null;
+	if (input.color !== undefined) values.color = optionalHexColor(input.color, 'color');
 	if (input.traits !== undefined) {
 		values.traits = requireStringArray(input.traits, 'traits');
 	}

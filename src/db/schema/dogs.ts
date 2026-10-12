@@ -42,6 +42,12 @@ export const dogs = pgTable(
 		/** Ruta en el static del frontend, o null si aún no hay foto. */
 		photo: varchar('photo', { length: 255 }),
 
+		/**
+		 * Color principal en hex (`#rrggbb`), o null = marrón de la marca.
+		 * Opcional para no obligar a reeditar la manada existente.
+		 */
+		color: varchar('color', { length: 7 }),
+
 		featured: boolean('featured').notNull().default(false),
 		sortOrder: integer('sort_order').notNull().default(0),
 

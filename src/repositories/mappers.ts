@@ -62,6 +62,9 @@ export function toDog(row: DogRow): Dog {
 	// `featured: false` en cada perrito como antes.
 	if (row.featured) dog.featured = true;
 
+	// Opcional: null/ausente = marrón de la marca en el frontend.
+	if (row.color) dog.color = row.color;
+
 	return dog;
 }
 
