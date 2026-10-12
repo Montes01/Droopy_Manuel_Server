@@ -41,26 +41,31 @@ export const siteContact: SiteContact = {
 	email: 'donaciones@droopymanuel.co',
 	socials: [
 		{
+			key: 'tiktok',
 			label: 'TikTok',
 			icon: '/icons/tiktok.png',
 			href: 'https://www.tiktok.com/@droopy.manuel?_r=1&_t=ZS-941vqEuOvdy'
 		},
 		{
+			key: 'instagram',
 			label: 'Instagram',
 			icon: '/icons/instagram.png',
 			href: 'https://www.instagram.com/droopymanuel?igsh=MTFtbmFuaHhkbWwweQ=='
 		},
 		{
+			key: 'facebook',
 			label: 'Facebook',
 			icon: '/icons/facebook.png',
 			href: 'https://www.facebook.com/share/18BXEMcn6s/'
 		},
 		{
+			key: 'youtube',
 			label: 'YouTube',
 			icon: '/icons/youtube.png',
 			href: 'https://www.youtube.com/@droopymanuel'
 		},
 		{
+			key: 'whatsapp',
 			label: 'WhatsApp',
 			icon: '/icons/whatsapp.png',
 			href: `https://wa.me/${WHATSAPP_NUMBER}`

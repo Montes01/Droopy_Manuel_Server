@@ -3,9 +3,11 @@ import { requireAdmin } from '../../auth/middleware.js';
 import { recordAudit } from '../../auth/users.js';
 import {
 	createBankAccount,
+	createContactChannel,
 	createDonationTier,
 	createTestimonial,
 	deleteBankAccount,
+	deleteContactChannel,
 	deleteDonationTier,
 	deleteTestimonial,
 	setSetting,
@@ -97,6 +99,54 @@ router.patch(
 				after: channel
 			});
 			res.json(channel);
+		} catch (error) {
+			handleValidation(error, res);
+		}
+	})
+);
+
+/** POST /api/admin/site/contact — agrega una red social (p. ej. instagram). */
+router.post(
+	'/contact',
+	requireAdmin(),
+	asyncHandler(async (req: Request, res: Response) => {
+		try {
+			const channel = await createContactChannel(req.body as ContactChannelInput);
+			await recordAudit({
+				userId: req.adminUser?.id,
+				entity: 'contact_channels',
+				entityKey: (channel as { key?: string })?.key ?? '',
+				action: 'crear',
+				after: channel
+			});
+			res.status(201).json(channel);
+		} catch (error) {
+			handleValidation(error, res);
+		}
+	})
+);
+
+/** DELETE /api/admin/site/contact/:key — quita una red social. Solo `admin`. */
+router.delete(
+	'/contact/:key',
+	requireAdmin('admin'),
+	asyncHandler(async (req: Request, res: Response) => {
+		const key = routeParam(req, res, 'key');
+		if (key === null) return;
+
+		try {
+			const deleted = await deleteContactChannel(key);
+			if (!deleted) {
+				notFound(res, `No existe el canal de contacto "${key}".`);
+				return;
+			}
+			await recordAudit({
+				userId: req.adminUser?.id,
+				entity: 'contact_channels',
+				entityKey: key,
+				action: 'borrar'
+			});
+			res.status(204).end();
 		} catch (error) {
 			handleValidation(error, res);
 		}

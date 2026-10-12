@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import {
 	bankAccounts,
@@ -9,7 +9,7 @@ import {
 } from '../db/schema/index.js';
 import type { BankAccount, DonationTier, PaymentMethod, Testimonial } from '../types.js';
 import { toBankAccount, toDonationTier, toTestimonial } from './mappers.js';
-import { ValidationError, optionalString, requireInt, requireString, requireStringArray } from './validation.js';
+import { ValidationError, optionalString, requireInt, requireString, requireStringArray, slugify } from './validation.js';
 
 /**
  * Escritura del contenido del sitio (panel de administración).
@@ -293,6 +293,79 @@ export interface ContactChannelInput {
 	sortOrder?: number;
 }
 
+/** Los enlaces de redes deben abrir algo: nada de texto suelto. */
+function requireHref(value: unknown): string {
+	const href = requireString(value, 'href', 500);
+	if (!/^https?:\/\/.+\..+/.test(href)) {
+		throw new ValidationError('El enlace debe ser una URL completa, por ejemplo https://instagram.com/….');
+	}
+	return href;
+}
+
+/**
+ * Crea un canal de contacto (una red social).
+ *
+ * La `key` se deriva del nombre («TikTok» → «tiktok»): es lo que el panel
+ * usa después para editar o borrar. El icono es opcional: si no viene, se
+ * usa `/icons/<key>.png`.
+ */
+export async function createContactChannel(input: ContactChannelInput): Promise<unknown> {
+	const label = requireString(input.label, 'label', 120);
+	const key = slugify(input.key ?? label);
+	if (!key) throw new ValidationError('No se pudo derivar un identificador a partir del nombre.');
+	if (key === 'whatsapp') {
+		throw new ValidationError('El canal de WhatsApp ya existe: se edita desde el número, no se crea.');
+	}
+	const href = requireHref(input.href);
+	const icon = input.icon !== undefined ? requireString(input.icon, 'icon', 255) : `/icons/${key}.png`;
+
+	const [existing] = await db
+		.select()
+		.from(contactChannels)
+		.where(eq(contactChannels.key, key))
+		.limit(1);
+	if (existing) throw new ValidationError(`Ya existe el canal "${key}".`);
+
+	const [top] = await db
+		.select({ sortOrder: contactChannels.sortOrder })
+		.from(contactChannels)
+		.orderBy(desc(contactChannels.sortOrder))
+		.limit(1);
+
+	const [row] = await db
+		.insert(contactChannels)
+		.values({
+			key,
+			label,
+			icon,
+			href,
+			phoneNumber: null,
+			phoneDisplay: null,
+			sortOrder: input.sortOrder !== undefined ? requireInt(input.sortOrder, 'sortOrder') : (top?.sortOrder ?? -1) + 1
+		})
+		.returning();
+
+	if (!row) throw new Error('No se pudo crear el canal.');
+	return row;
+}
+
+/**
+ * Borra un canal de contacto. WhatsApp está protegido: es el número de la
+ * fundación y se gestiona desde su propio formulario.
+ */
+export async function deleteContactChannel(key: string): Promise<boolean> {
+	const normalizedKey = key.trim().toLowerCase();
+	if (normalizedKey === 'whatsapp') {
+		throw new ValidationError('El canal de WhatsApp no se puede borrar.');
+	}
+
+	const deleted = await db
+		.delete(contactChannels)
+		.where(eq(contactChannels.key, normalizedKey))
+		.returning({ id: contactChannels.id });
+	return deleted.length > 0;
+}
+
 /**
  * Actualiza un canal de contacto. Si el canal no existe, lo crea: así el
  * panel nunca queda bloqueado con "No existe el canal…" por una fila
@@ -310,7 +383,7 @@ export async function updateContactChannel(
 	const values: Record<string, unknown> = {};
 	if (input.label !== undefined) values.label = requireString(input.label, 'label', 120);
 	if (input.icon !== undefined) values.icon = requireString(input.icon, 'icon', 255);
-	if (input.href !== undefined) values.href = requireString(input.href, 'href', 500);
+	if (input.href !== undefined) values.href = requireHref(input.href);
 	if (input.sortOrder !== undefined) values.sortOrder = requireInt(input.sortOrder, 'sortOrder');
 
 	let phoneNumber: string | null | undefined;

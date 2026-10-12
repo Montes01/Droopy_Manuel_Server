@@ -209,7 +209,7 @@ async function seed(): Promise<void> {
 	console.log('Insertando canales de contacto…');
 	await db.insert(contactChannels).values(
 		siteContact.socials.map((channel, index) => ({
-			key: channel.label.toLowerCase(),
+			key: channel.key,
 			label: channel.label,
 			icon: channel.icon,
 			href: channel.href,

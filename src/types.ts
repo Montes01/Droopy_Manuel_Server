@@ -239,6 +239,8 @@ export interface SiteContent {
  * a la API para no repetirlo en plantillas, placeholders y enlaces.
  */
 export interface ContactChannel {
+	/** Identificador en la base: whatsapp, instagram… */
+	key: string;
 	/** Nombre visible: WhatsApp, Instagram… */
 	label: string;
 	/** Icono en el `static` del frontend, ej. /icons/whatsapp.png */

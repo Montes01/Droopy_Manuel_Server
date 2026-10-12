@@ -197,6 +197,7 @@ export function toSiteContact(
 		whatsappUrl: number ? `https://wa.me/${number}` : '',
 		email,
 		socials: channels.map((channel) => ({
+			key: channel.key,
 			label: channel.label,
 			icon: channel.icon,
 			href: channel.href
