@@ -263,8 +263,7 @@ curl -c cookies.txt -X POST http://localhost:3100/api/auth/login \
 # Crea un perrito con esa sesión
 curl -b cookies.txt -X POST http://localhost:3100/api/admin/dogs \
   -H 'Content-Type: application/json' \
-  -d '{"name":"Nuevo","breed":"Mestizo","ageYears":1,"ageLabel":"1 año",'\
-'"sex":"macho","size":"mediano","energy":"tranquilo","status":"en-adopcion",'\
+  -d '{"name":"Nuevo","breed":"Mestizo","birthDate":"2024-01-01","isApprox":true,"sex":"macho","size":"mediano","energy":"tranquilo","status":"en-adopcion",'\
 '"arrival":"2026-01-01","story":"Llegó hoy."}'
 ```
 

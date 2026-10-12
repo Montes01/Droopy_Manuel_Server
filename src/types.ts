@@ -28,8 +28,8 @@ export interface Dog {
 	slug: Slug;
 	name: string;
 	breed: string;
-	ageYears: number;
-	ageLabel: string;
+	birthDate: ISODate | null; // YYYY-MM-DD, null = unknown age
+	isApprox: boolean;          // true = fundación estimate
 	sex: DogSex;
 	size: DogSize;
 	energy: DogEnergy;

@@ -168,8 +168,8 @@ try {
 	const created = await action('/admin/manada?/create', {
 		name: 'Perrito De Prueba Panel',
 		breed: 'Mestizo',
-		ageYears: '2',
-		ageLabel: '2 años',
+		birthDate: '2023-01-01',
+		isApprox: true,
 		sex: 'macho',
 		size: 'mediano',
 		energy: 'tranquilo',

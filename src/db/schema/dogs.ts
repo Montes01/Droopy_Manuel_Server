@@ -19,9 +19,10 @@ export const dogs = pgTable(
 
 		name: varchar('name', { length: 120 }).notNull(),
 		breed: varchar('breed', { length: 120 }).notNull(),
-		ageYears: integer('age_years').notNull(),
-		/** Texto ya formateado: «10 meses», «2 años». */
-		ageLabel: varchar('age_label', { length: 60 }).notNull(),
+		/** Fecha de nacimiento estimada (YYYY-MM-DD). Null si no se conoce. */
+		birthDate: varchar('birth_date', { length: 10 }),
+		/** true = edad aproximada de la fundación (por ejemplo, edad de rescate sin fecha exacta). */
+		isApprox: boolean('is_approx').notNull().default(false),
 		sex: dogSexEnum('sex').notNull(),
 		size: dogSizeEnum('size').notNull(),
 		energy: dogEnergyEnum('energy').notNull(),

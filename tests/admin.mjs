@@ -101,8 +101,8 @@ try {
 	const anonCreate = await anon.request('POST', '/api/admin/dogs', {
 		name: 'Intruso',
 		breed: 'Mestizo',
-		ageYears: 1,
-		ageLabel: '1 año',
+		birthDate: '2024-01-01',
+		isApprox: true,
 		sex: 'macho',
 		size: 'mediano',
 		energy: 'tranquilo',
@@ -149,8 +149,8 @@ try {
 	const created = await admin.request('POST', '/api/admin/dogs', {
 		name: 'Perrito de Prueba',
 		breed: 'Mestizo',
-		ageYears: 2,
-		ageLabel: '2 años',
+		birthDate: '2023-01-01',
+		isApprox: true,
 		sex: 'hembra',
 		size: 'pequeño',
 		energy: 'juguetón',
@@ -187,8 +187,8 @@ try {
 	const dupe = await admin.request('POST', '/api/admin/dogs', {
 		name: 'Luna',
 		breed: 'X',
-		ageYears: 1,
-		ageLabel: '1 año',
+		birthDate: '2024-01-01',
+		isApprox: true,
 		sex: 'hembra',
 		size: 'mediano',
 		energy: 'tranquilo',
@@ -210,8 +210,8 @@ try {
 	const editorCreate = await editor.request('POST', '/api/admin/dogs', {
 		name: 'Creado por Editor',
 		breed: 'Mestizo',
-		ageYears: 1,
-		ageLabel: '1 año',
+		birthDate: '2024-01-01',
+		isApprox: true,
 		sex: 'macho',
 		size: 'mediano',
 		energy: 'tranquilo',

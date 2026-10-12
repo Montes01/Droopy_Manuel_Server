@@ -10,8 +10,10 @@ import {
 	optionalHexColor,
 	requireEnum,
 	requireInt,
+	requireBooleanish,
 	requireString,
 	requireStringArray,
+	requireNullableISODate,
 	slugify
 } from './validation.js';
 
@@ -28,8 +30,8 @@ export interface DogInput {
 	slug?: string;
 	name?: string;
 	breed?: string;
-	ageYears?: number;
-	ageLabel?: string;
+	birthDate?: string | null; // YYYY-MM-DD, null = desconocido
+	isApprox?: boolean;        // true = fundación estima
 	sex?: Dog['sex'];
 	size?: Dog['size'];
 	energy?: Dog['energy'];
@@ -67,11 +69,11 @@ function buildValues(input: DogInput, partial: boolean) {
 	if (!partial || input.breed !== undefined) {
 		values.breed = requireString(input.breed, 'breed', 120);
 	}
-	if (!partial || input.ageYears !== undefined) {
-		values.ageYears = requireInt(input.ageYears, 'ageYears');
+	if (!partial || input.birthDate !== undefined) {
+		values.birthDate = requireNullableISODate(input.birthDate, 'birthDate');
 	}
-	if (!partial || input.ageLabel !== undefined) {
-		values.ageLabel = requireString(input.ageLabel, 'ageLabel', 60);
+	if (!partial || input.isApprox !== undefined) {
+		values.isApprox = requireBooleanish(input.isApprox, 'isApprox');
 	}
 	if (!partial || input.sex !== undefined) {
 		values.sex = requireEnum(input.sex, SEXES, 'sex');

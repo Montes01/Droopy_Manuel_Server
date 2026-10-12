@@ -1,19 +1,26 @@
 {
-  "version": "7",
+  "version": "8",
   "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "7",
+      "version": "8",
       "when": 1791524074148,
       "tag": "0000_complete_sasquatch",
       "breakpoints": true
     },
     {
       "idx": 1,
-      "version": "7",
+      "version": "8",
       "when": 1791524074149,
       "tag": "0001_add_dogs_color",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "8",
+      "when": 1791524074150,
+      "tag": "0002_birth_date",
       "breakpoints": true
     }
   ]

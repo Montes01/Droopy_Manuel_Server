@@ -6,6 +6,8 @@
  * todos los recursos.
  */
 
+import type { ISODate } from '../types.js';
+
 /** Error de validación: se traduce a un 400 en la ruta. */
 export class ValidationError extends Error {
 	constructor(message: string) {
@@ -50,6 +52,14 @@ export function optionalString(value: unknown, field: string, max = 255): string
 	return text;
 }
 
+/** Convierte booleano o string "on" a boolean; undefined/null → false. */
+export function requireBooleanish(value: unknown, field: string): boolean {
+	if (value === undefined || value === null) return false;
+	if (typeof value === 'boolean') return value;
+	if (typeof value === 'string') return value.toLowerCase() === 'on';
+	throw new ValidationError(`El campo "${field}" debe ser true/false o "on".`);
+}
+
 export function requireEnum<T extends string>(value: unknown, allowed: T[], field: string): T {
 	if (typeof value !== 'string' || !allowed.includes(value as T)) {
 		throw new ValidationError(`El campo "${field}" debe ser uno de: ${allowed.join(', ')}.`);
@@ -76,8 +86,26 @@ export function requireStringArray(value: unknown, field: string): string[] {
 /** Fecha ISO sencilla (YYYY-MM-DD). */
 export const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-/**
- * Color opcional del perrito: `undefined`/`null`/vacío = sin color (el
+/** Valida que un valor sea una fecha ISO válida o null/undefined. */
+export function requireNullableISODate(value: unknown, field: string): ISODate | null {
+	if (value === undefined || value === null) return null;
+	if (typeof value !== 'string') {
+		throw new ValidationError(`El campo "${field}" debe ser una fecha ISO (YYYY-MM-DD) o nulo.`);
+	}
+	if (!DATE_RE.test(value)) {
+		throw new ValidationError(`El campo "${field}" debe tener el formato YYYY-MM-DD.`);
+	}
+	// Opcional: no permitir fechas futuras.
+	const [year, month, day] = value.split('-').map(Number);
+	const date = new Date(Number(year), Number(month) - 1, Number(day));
+	const today = new Date();
+	if (date > today) {
+		throw new ValidationError(`El campo "${field}" no puede ser una fecha futura.`);
+	}
+	return value as ISODate;
+}
+
+/** Color opcional del perrito: `undefined`/`null`/vacío = sin color (el
  * frontend usa el marrón). El panel solo lo escribe con el picker
  * (`#rrggbb`), así que esto normaliza sin validar: lo irreconocible se
  * guarda como sin color en vez de fallar.

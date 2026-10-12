@@ -43,17 +43,18 @@
           "primaryKey": false,
           "notNull": true
         },
-        "age_years": {
-          "name": "age_years",
-          "type": "integer",
+        "birth_date": {
+          "name": "birth_date",
+          "type": "varchar(10)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
-        "age_label": {
-          "name": "age_label",
-          "type": "varchar(60)",
+        "is_approx": {
+          "name": "is_approx",
+          "type": "boolean",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         },
         "sex": {
           "name": "sex",
