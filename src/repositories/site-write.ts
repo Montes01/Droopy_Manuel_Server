@@ -294,21 +294,26 @@ export interface ContactChannelInput {
 }
 
 /**
- * Actualiza un canal de contacto.
+ * Actualiza un canal de contacto. Si el canal no existe, lo crea: así el
+ * panel nunca queda bloqueado con "No existe el canal…" por una fila
+ * faltante en `contact_channels` (p. ej. base sin seed o fila borrada).
  *
- * Para WhatsApp se recalcula `phoneDisplay` a partir del número, de modo que
- * el texto visible no pueda divergir del número que se usa en el enlace.
+ * Para WhatsApp se recalcula `phoneDisplay` y `href` (`https://wa.me/...`)
+ * a partir del número, de modo que el texto visible y el enlace no puedan
+ * divergir del número que se usa en el enlace.
  */
 export async function updateContactChannel(
 	key: string,
 	input: ContactChannelInput
 ): Promise<unknown | undefined> {
+	const normalizedKey = key.trim().toLowerCase();
 	const values: Record<string, unknown> = {};
 	if (input.label !== undefined) values.label = requireString(input.label, 'label', 120);
 	if (input.icon !== undefined) values.icon = requireString(input.icon, 'icon', 255);
 	if (input.href !== undefined) values.href = requireString(input.href, 'href', 500);
 	if (input.sortOrder !== undefined) values.sortOrder = requireInt(input.sortOrder, 'sortOrder');
 
+	let phoneNumber: string | null | undefined;
 	if (input.phoneNumber !== undefined) {
 		const number = input.phoneNumber === null ? null : requireString(input.phoneNumber, 'phoneNumber', 30);
 		if (number !== null && !/^\d{10,15}$/.test(number)) {
@@ -316,21 +321,69 @@ export async function updateContactChannel(
 				'El número debe ir en formato internacional sin signos, por ejemplo 573226438857.'
 			);
 		}
+		phoneNumber = number;
 		values.phoneNumber = number;
 		// Se deriva del número para que no puedan contradecirse.
 		values.phoneDisplay = number === null ? null : formatPhone(number);
+		// El enlace del canal WhatsApp también sale del número. Sin esto,
+		// la lista de redes seguiría apuntando al número viejo aunque
+		// `whatsappUrl` (derivado) ya mostrara el nuevo.
+		if (normalizedKey === 'whatsapp' && number !== null && input.href === undefined) {
+			values.href = `https://wa.me/${number}`;
+		}
 	}
 
 	if (Object.keys(values).length === 0) {
 		throw new ValidationError('No se envió ningún campo para actualizar.');
 	}
 
-	const [row] = await db
+	const [updated] = await db
 		.update(contactChannels)
 		.set(values)
-		.where(eq(contactChannels.key, key))
+		.where(eq(contactChannels.key, normalizedKey))
 		.returning();
 
+	if (updated) return updated;
+
+	// La fila no existía: crearla en vez de devolver 404.
+	const label =
+		input.label !== undefined
+			? (values.label as string)
+			: normalizedKey === 'whatsapp'
+				? 'WhatsApp'
+				: normalizedKey.charAt(0).toUpperCase() + normalizedKey.slice(1);
+	const icon =
+		input.icon !== undefined
+			? (values.icon as string)
+			: `/icons/${normalizedKey}.png`;
+	const href =
+		values.href !== undefined
+			? (values.href as string)
+			: normalizedKey === 'whatsapp' && phoneNumber
+				? `https://wa.me/${phoneNumber}`
+				: '';
+	const [inserted] = await db
+		.insert(contactChannels)
+		.values({
+			key: normalizedKey,
+			label,
+			icon,
+			href,
+			phoneNumber: (values.phoneNumber as string | null) ?? null,
+			phoneDisplay: (values.phoneDisplay as string | null) ?? null,
+			sortOrder: (values.sortOrder as number) ?? 0
+		})
+		.onConflictDoNothing({ target: contactChannels.key })
+		.returning();
+
+	if (inserted) return inserted;
+
+	// Otro proceso la creó entre el UPDATE y el INSERT: releer.
+	const [row] = await db
+		.select()
+		.from(contactChannels)
+		.where(eq(contactChannels.key, normalizedKey))
+		.limit(1);
 	return row;
 }
 
