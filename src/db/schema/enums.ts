@@ -1,5 +1,5 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { DOG_STATUSES } from '../../types.js';
+import { DOG_STATUSES, PROJECT_SECTION_KINDS } from '../../types.js';
 
 /**
  * Enums del dominio.
@@ -10,6 +10,9 @@ import { DOG_STATUSES } from '../../types.js';
  */
 
 export const dogStatusEnum = pgEnum('dog_status', DOG_STATUSES);
+
+/** Clase visual de una sección de la página `/project`. */
+export const projectSectionKindEnum = pgEnum('project_section_kind', PROJECT_SECTION_KINDS);
 
 export const dogSizeEnum = pgEnum('dog_size', ['pequeño', 'mediano', 'grande']);
 

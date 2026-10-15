@@ -71,6 +71,34 @@ export interface Dog {
 /** Vista de la manada: vivos o en el cielo. */
 export type PackView = 'alive' | 'heaven';
 
+// ------------------------------------------------------- Página de proyecto
+
+/**
+ * Clases de sección de la página `/project`.
+ *
+ * `hero` es el titular con el logo, `chapter` una tarjeta de historia y
+ * `closing` la cita de cierre con el enlace a la manada.
+ */
+export const PROJECT_SECTION_KINDS = ['hero', 'chapter', 'closing'] as const;
+
+export type ProjectSectionKind = (typeof PROJECT_SECTION_KINDS)[number];
+
+/**
+ * Un bloque editable de la página `/project`.
+ *
+ * Una sola tabla sin relaciones: el orden lo da `position` (único, pero
+ * modificable; al mover una sección las demás se recorren). `title` nulo =
+ * sin encabezado visible. `body` son párrafos en texto plano con `**negrita**`
+ * como único formato.
+ */
+export interface ProjectSection {
+	id: number;
+	position: number;
+	kind: ProjectSectionKind;
+	title: string | null;
+	body: string[];
+}
+
 /** Un perrito al que se puede dirigir una donación. */
 export interface DonationTarget {
 	dog: Dog;

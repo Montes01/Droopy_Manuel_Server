@@ -29,6 +29,13 @@
       "when": 1791524074151,
       "tag": "0003_add_comunitario_status",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "8",
+      "when": 1791524074152,
+      "tag": "0004_project_sections",
+      "breakpoints": true
     }
   ]
 }

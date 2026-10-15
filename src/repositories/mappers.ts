@@ -12,6 +12,7 @@ import type {
 	DonationTarget,
 	DonationTier,
 	NewsItem,
+	ProjectSection,
 	SiteContact,
 	SiteContent,
 	SiteStats,
@@ -28,6 +29,7 @@ import type {
 	DonationTargetRow,
 	DonationTierRow,
 	NewsRow,
+	ProjectSectionRow,
 	ShopCategoryRow,
 	ShopItemRow,
 	ShopVariantRow,
@@ -122,6 +124,17 @@ export function toNewsItem(row: NewsRow, relatedDogSlugs: string[]): NewsItem {
 	};
 	if (row.featured) item.featured = true;
 	return item;
+}
+
+/** Una fila de `project_sections` tal como la consume el frontend. */
+export function toProjectSection(row: ProjectSectionRow): ProjectSection {
+	return {
+		id: row.id,
+		position: row.position,
+		kind: row.kind,
+		title: row.title,
+		body: row.body
+	};
 }
 
 export function toDonationTier(row: DonationTierRow): DonationTier {

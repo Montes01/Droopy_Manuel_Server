@@ -4,6 +4,7 @@ import { sql } from 'drizzle-orm';
 
 import { db } from './db/index.js';
 import dogsRouter from './routes/dogs.js';
+import projectRouter from './routes/project.js';
 import shopRouter from './routes/shop.js';
 import newsRouter from './routes/news.js';
 import ordersRouter from './routes/orders.js';
@@ -68,6 +69,7 @@ export function createApp(): Express {
 	app.use('/api/auth', authRouter);
 	app.use('/api/admin', adminRouter);
 	app.use('/api/dogs', dogsRouter);
+	app.use('/api/project', projectRouter);
 	app.use('/api/shop', shopRouter);
 	app.use('/api/news', newsRouter);
 	app.use('/api/orders', ordersRouter);
@@ -88,6 +90,7 @@ export function createApp(): Express {
 				'GET  /api/dogs/featured',
 				'GET  /api/dogs/pack?view=alive|heaven',
 				'GET  /api/dogs/:slug',
+				'GET  /api/project',
 				'GET  /api/shop/categories',
 				'GET  /api/shop/categories/:slug',
 				'GET  /api/shop/items?category=',
