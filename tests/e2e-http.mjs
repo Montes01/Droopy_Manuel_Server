@@ -78,7 +78,7 @@ await check(
 	'/api/news?offset=0&limit=6',
 	(b) => b.items.length === 6 && b.hasMore === true
 );
-await check('GET /api/news/categories (5)', '/api/news/categories', (b) => b.length === 5);
+await check('GET /api/news/categories (7)', '/api/news/categories', (b) => b.length === 7);
 await check('GET /api/site/content', '/api/site/content', (b) => b.stats.rescued === 248);
 await check('GET /api/site/donation-tiers (4)', '/api/site/donation-tiers', (b) => b.length === 4);
 await check('GET /api/site/testimonials (4)', '/api/site/testimonials', (b) => b.length === 4);

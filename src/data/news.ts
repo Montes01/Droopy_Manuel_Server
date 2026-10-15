@@ -12,7 +12,9 @@ export const newsCategories: { slug: NewsCategory; label: string; emoji: string 
 	{ slug: 'adopcion', label: 'Adopción', emoji: '🏠' },
 	{ slug: 'salud', label: 'Salud', emoji: '💉' },
 	{ slug: 'evento', label: 'Evento', emoji: '🎉' },
-	{ slug: 'tienda', label: 'Tienda', emoji: '🛍️' }
+	{ slug: 'tienda', label: 'Tienda', emoji: '🛍️' },
+	{ slug: 'proyecto', label: 'Proyecto', emoji: '⭐' },
+	{ slug: 'ayudas', label: 'Ayudas', emoji: '🤝' }
 ];
 
 export const news: NewsItem[] = [

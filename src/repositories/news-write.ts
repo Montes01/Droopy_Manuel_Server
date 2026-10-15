@@ -2,6 +2,7 @@ import { eq, inArray } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { dogs, news, newsRelatedDogs } from '../db/schema/index.js';
 import type { NewsCategory, NewsItem } from '../types.js';
+import { NEWS_CATEGORY_SLUGS } from '../types.js';
 import { toNewsItem } from './mappers.js';
 import {
 	DATE_RE,
@@ -35,7 +36,7 @@ export interface NewsInput {
 	relatedDogSlugs?: string[];
 }
 
-const CATEGORIES = ['rescate', 'adopcion', 'salud', 'evento', 'tienda'];
+/** Las categorías válidas viven en `../types.js` (NEWS_CATEGORY_SLUGS): no duplicarlas. */
 
 function buildValues(input: NewsInput, partial: boolean) {
 	const values: Record<string, unknown> = {};
@@ -61,7 +62,7 @@ function buildValues(input: NewsInput, partial: boolean) {
 		values.date = date;
 	}
 	if (!partial || input.category !== undefined) {
-		values.category = requireEnum(input.category, CATEGORIES, 'category');
+		values.category = requireEnum(input.category, [...NEWS_CATEGORY_SLUGS], 'category');
 	}
 	if (!partial || input.emoji !== undefined) {
 		values.emoji = optionalString(input.emoji, 'emoji', 16);

@@ -202,7 +202,24 @@ export interface Order extends OrderResult {
 
 // ---------------------------------------------------------------- Noticias
 
-export type NewsCategory = 'rescate' | 'adopcion' | 'salud' | 'evento' | 'tienda';
+/**
+ * Categorías de noticias.
+ *
+ * Fuente única: el enum de la base (`newsCategoryEnum`) y la validación de
+ * escritura (`news-write.ts`) derivan de aquí. Las etiquetas visibles viven
+ * en `repositories/news.ts` (NEWS_CATEGORIES, lo que sirve la API).
+ */
+export const NEWS_CATEGORY_SLUGS = [
+	'rescate',
+	'adopcion',
+	'salud',
+	'evento',
+	'tienda',
+	'proyecto',
+	'ayudas'
+] as const;
+
+export type NewsCategory = (typeof NEWS_CATEGORY_SLUGS)[number];
 
 export interface NewsItem {
 	slug: Slug;

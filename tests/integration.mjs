@@ -145,7 +145,7 @@ try {
 	check('getNews() → 12', newsAll.length === 12, `len=${newsAll.length}`);
 
 	const newsCategories = await news.getNewsCategories();
-	check('getNewsCategories() → 5', newsCategories.length === 5, `len=${newsCategories.length}`);
+	check('getNewsCategories() → 7', newsCategories.length === 7, `len=${newsCategories.length}`);
 	check(
 		'las categorías traen label',
 		newsCategories.every((c) => typeof c.label === 'string' && c.label.length > 0)

@@ -1,5 +1,5 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { DOG_STATUSES, PROJECT_SECTION_KINDS } from '../../types.js';
+import { DOG_STATUSES, NEWS_CATEGORY_SLUGS, PROJECT_SECTION_KINDS } from '../../types.js';
 
 /**
  * Enums del dominio.
@@ -37,13 +37,7 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 	'rechazado'
 ]);
 
-export const newsCategoryEnum = pgEnum('news_category', [
-	'rescate',
-	'adopcion',
-	'salud',
-	'evento',
-	'tienda'
-]);
+export const newsCategoryEnum = pgEnum('news_category', NEWS_CATEGORY_SLUGS);
 
 export const paymentMethodEnum = pgEnum('payment_method', [
 	'transferencia',
