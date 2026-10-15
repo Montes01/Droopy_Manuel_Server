@@ -13,7 +13,26 @@ export type PhotoPath = string | null;
 
 // ---------------------------------------------------------------- Perritos
 
-export type DogStatus = 'en-adopcion' | 'hogar-temporal' | 'adoptado' | 'en-memoria';
+/**
+ * Todos los estados posibles de un perrito.
+ *
+ * Fuente única del dominio: el enum de la base (`dogStatusEnum`), la
+ * validación de escritura (`dogs-write.ts`) y la vista cielo/viva
+ * (`dogs.ts`) derivan de aquí. El frontend conserva una copia en
+ * `src/lib/data/types.ts`.
+ */
+export const DOG_STATUSES = [
+	'en-adopcion',
+	'hogar-temporal',
+	'adoptado',
+	'comunitario',
+	'en-memoria'
+] as const;
+
+export type DogStatus = (typeof DOG_STATUSES)[number];
+
+/** Estado que pone a un perrito en el cielo; todo lo demás es manada viva. */
+export const HEAVEN_STATUS: DogStatus = 'en-memoria';
 export type DogSize = 'pequeño' | 'mediano' | 'grande';
 export type DogSex = 'macho' | 'hembra';
 export type DogEnergy = 'tranquilo' | 'moderado' | 'juguetón';

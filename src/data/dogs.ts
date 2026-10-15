@@ -1,8 +1,9 @@
 import type { Dog, DogStatus, PackView, Slug } from '../types.js';
+import { HEAVEN_STATUS } from '../types.js';
 
 /** Filtra la manada para obtener solo perritos en adopción (vivos). */
 export function alivePack(): Dog[] {
-	return dogs.filter((dog: Dog) => dog.status !== 'en-memoria');
+	return dogs.filter((dog: Dog) => dog.status !== HEAVEN_STATUS);
 }
 
 /**

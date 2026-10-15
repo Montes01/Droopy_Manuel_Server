@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { dogs } from '../db/schema/index.js';
 import type { Dog, DogStatus } from '../types.js';
+import { DOG_STATUSES } from '../types.js';
 import { toDog } from './mappers.js';
 import { getAllDogs } from './dogs.js';
 import {
@@ -52,7 +53,7 @@ export interface DogInput {
 const SEXES = ['macho', 'hembra'];
 const SIZES = ['pequeño', 'mediano', 'grande'];
 const ENERGIES = ['tranquilo', 'moderado', 'juguetón'];
-const STATUSES = ['en-adopcion', 'hogar-temporal', 'adoptado', 'en-memoria'];
+// Los estados válidos viven en `../types.js` (DOG_STATUSES): no duplicarlos.
 
 /**
  * Construye los valores a escribir a partir de la entrada del panel.
@@ -85,7 +86,7 @@ function buildValues(input: DogInput, partial: boolean) {
 		values.energy = requireEnum(input.energy, ENERGIES, 'energy');
 	}
 	if (!partial || input.status !== undefined) {
-		values.status = requireEnum(input.status, STATUSES, 'status');
+		values.status = requireEnum(input.status, [...DOG_STATUSES], 'status');
 	}
 	if (!partial || input.arrival !== undefined) {
 		const arrival = requireString(input.arrival, 'arrival', 10);

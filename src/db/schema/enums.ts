@@ -1,4 +1,5 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
+import { DOG_STATUSES } from '../../types.js';
 
 /**
  * Enums del dominio.
@@ -8,12 +9,7 @@ import { pgEnum } from 'drizzle-orm/pg-core';
  * Renombrar un valor aquí exige una migración que reescriba los datos.
  */
 
-export const dogStatusEnum = pgEnum('dog_status', [
-	'en-adopcion',
-	'hogar-temporal',
-	'adoptado',
-	'en-memoria'
-]);
+export const dogStatusEnum = pgEnum('dog_status', DOG_STATUSES);
 
 export const dogSizeEnum = pgEnum('dog_size', ['pequeño', 'mediano', 'grande']);
 

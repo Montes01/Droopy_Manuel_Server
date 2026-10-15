@@ -2,6 +2,7 @@ import { asc, eq, inArray, ne } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { dogs } from '../db/schema/index.js';
 import type { Dog, DogStatus, PackView, Slug } from '../types.js';
+import { HEAVEN_STATUS } from '../types.js';
 import { toDog } from './mappers.js';
 
 /**
@@ -62,7 +63,7 @@ export async function getAlivePack(): Promise<Dog[]> {
 	const rows = await db
 		.select()
 		.from(dogs)
-		.where(ne(dogs.status, 'en-memoria'))
+		.where(ne(dogs.status, HEAVEN_STATUS))
 		.orderBy(...DOG_ORDER);
 	return rows.map(toDog);
 }
@@ -74,7 +75,7 @@ export async function getAlivePack(): Promise<Dog[]> {
  * aparece aquí siempre.
  */
 export async function getHeavenPack(): Promise<Dog[]> {
-	return getDogsByStatus('en-memoria');
+	return getDogsByStatus(HEAVEN_STATUS);
 }
 
 export async function getPack(view: PackView): Promise<Dog[]> {
