@@ -9,7 +9,10 @@
 import type {
 	BankAccount,
 	Dog,
+	DogAccessory,
+	DogHealth,
 	DogNews,
+	DogVaccine,
 	DonationTarget,
 	DonationTier,
 	NewsItem,
@@ -26,8 +29,11 @@ import type {
 import type {
 	BankAccountRow,
 	ContactChannelRow,
+	DogAccessoryRow,
+	DogHealthRow,
 	DogNewsRow,
 	DogRow,
+	DogVaccineRow,
 	DonationTargetRow,
 	DonationTierRow,
 	NewsRow,
@@ -53,7 +59,6 @@ export function toDog(row: DogRow): Dog {
 			dogs: row.goodWithDogs,
 			cats: row.goodWithCats
 		},
-		vaccinated: row.vaccinated,
 		sterilized: row.sterilized,
 		status: row.status,
 		arrival: row.arrival,
@@ -70,6 +75,37 @@ export function toDog(row: DogRow): Dog {
 	if (row.color) dog.color = row.color;
 
 	return dog;
+}
+
+export function toDogHealth(row: DogHealthRow): DogHealth {
+	return {
+		dogSlug: row.dogSlug,
+		lastBath: row.lastBath,
+		nextBath: row.nextBath,
+		vetVisitDone: row.vetVisitDone,
+		vetVisitDate: row.vetVisitDate
+	};
+}
+
+export function toDogVaccine(row: DogVaccineRow): DogVaccine {
+	return {
+		id: row.id,
+		dogSlug: row.dogSlug,
+		name: row.name,
+		applied: row.applied,
+		appliedDate: row.appliedDate,
+		recommendation: row.recommendation
+	};
+}
+
+export function toDogAccessory(row: DogAccessoryRow): DogAccessory {
+	return {
+		id: row.id,
+		dogSlug: row.dogSlug,
+		label: row.label,
+		value: row.value,
+		provided: row.provided
+	};
 }
 
 export function toShopCategory(row: ShopCategoryRow): ShopCategory {

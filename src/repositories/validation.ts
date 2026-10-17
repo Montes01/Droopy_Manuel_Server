@@ -105,6 +105,18 @@ export function requireNullableISODate(value: unknown, field: string): ISODate |
 	return value as ISODate;
 }
 
+/**
+ * Como `requireNullableISODate`, pero sin prohibir fechas futuras: los campos
+ * «próximo baño» o la fecha de una visita agendada viven en el futuro.
+ */
+export function requireNullableISODateAny(value: unknown, field: string): ISODate | null {
+	if (value === undefined || value === null || value === '') return null;
+	if (typeof value !== 'string' || !DATE_RE.test(value)) {
+		throw new ValidationError(`El campo "${field}" debe tener el formato YYYY-MM-DD.`);
+	}
+	return value as ISODate;
+}
+
 /** Color opcional del perrito: `undefined`/`null`/vacío = sin color (el
  * frontend usa el marrón). El panel solo lo escribe con el picker
  * (`#rrggbb`), así que esto normaliza sin validar: lo irreconocible se

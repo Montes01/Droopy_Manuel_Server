@@ -53,7 +53,6 @@ export interface Dog {
 	size: DogSize;
 	energy: DogEnergy;
 	goodWith: DogGoodWith;
-	vaccinated: boolean;
 	sterilized: boolean;
 	status: DogStatus;
 	arrival: ISODate;
@@ -107,6 +106,64 @@ export interface DogNews {
 	photo: PhotoPath;
 	/** true = necesita ayuda urgente (se resalta en el perfil). */
 	urgent?: boolean;
+}
+
+// ------------------------------------------------------- Salud de la manada
+
+/**
+ * Salud de un perrito: baños y visita anual del veterinario.
+ *
+ * Es 1:1 con el perrito: si no hay fila, o la fila está vacía, el perfil no
+ * muestra la sección. `lastBath`/`nextBath`/`vetVisitDate` son fechas ISO
+ * (`YYYY-MM-DD`) o null.
+ */
+export interface DogHealth {
+	dogSlug: Slug;
+	lastBath: ISODate | null;
+	nextBath: ISODate | null;
+	/** true = ya se hizo la visita anual. */
+	vetVisitDone: boolean;
+	/** Fecha de la visita anual (hecha o agendada). */
+	vetVisitDate: ISODate | null;
+}
+
+/**
+ * Una vacuna del perrito.
+ *
+ * `recommendation` es texto libre por perrito: la indicación que ve la
+ * comunidad («refuerzo anual», «falta antes de adoptar»…).
+ */
+export interface DogVaccine {
+	id: number;
+	dogSlug: Slug;
+	name: string;
+	applied: boolean;
+	appliedDate: ISODate | null;
+	recommendation: string;
+}
+
+/** Un accesorio o elemento de seguridad del perrito. */
+export interface DogAccessory {
+	id: number;
+	dogSlug: Slug;
+	label: string;
+	/** Nota libre (talla, color, estado…). Null = sin nota. */
+	value: string | null;
+	/** true = lo tiene; false = le falta. */
+	provided: boolean;
+}
+
+/**
+ * Perfil de salud completo: lo que el modal pide de una sola vez.
+ *
+ * `health` es null si no hay fila; `vaccines` y `accessories` son listas vacías
+ * si no hay datos. Así el frontend decide qué secciones renderizar.
+ */
+export interface DogHealthProfile {
+	dogSlug: Slug;
+	health: DogHealth | null;
+	vaccines: DogVaccine[];
+	accessories: DogAccessory[];
 }
 
 // ------------------------------------------------------- Página de proyecto

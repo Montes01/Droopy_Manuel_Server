@@ -25,12 +25,20 @@ import {
 } from '../data/content.js';
 import { dogs as dogsSeed } from '../data/dogs.js';
 import { dogNews as dogNewsSeed } from '../data/dog-news.js';
+import {
+	dogAccessories as dogAccessoriesSeed,
+	dogHealth as dogHealthSeed,
+	dogVaccines as dogVaccinesSeed
+} from '../data/dog-health.js';
 import { news as newsSeed } from '../data/news.js';
 import { shopCategories as categoriesSeed, shopItems as itemsSeed } from '../data/shop.js';
 import {
 	bankAccounts,
 	contactChannels,
+	dogAccessories,
+	dogHealth,
 	dogNews,
+	dogVaccines,
 	donationTargets,
 	donationTiers,
 	dogs,
@@ -47,6 +55,9 @@ import {
 async function reset(): Promise<void> {
 	// El orden respeta las claves foráneas: primero lo que depende de otros.
 	await db.delete(dogNews);
+	await db.delete(dogAccessories);
+	await db.delete(dogVaccines);
+	await db.delete(dogHealth);
 	await db.delete(newsRelatedDogs);
 	await db.delete(news);
 	await db.delete(donationTargets);
@@ -79,7 +90,6 @@ async function seed(): Promise<void> {
 			goodWithKids: dog.goodWith.kids,
 			goodWithDogs: dog.goodWith.dogs,
 			goodWithCats: dog.goodWith.cats,
-			vaccinated: dog.vaccinated,
 			sterilized: dog.sterilized,
 			status: dog.status,
 			arrival: dog.arrival,
@@ -177,6 +187,37 @@ async function seed(): Promise<void> {
 	console.log(`Insertando ${validDogNews.length} comunicados…`);
 	if (validDogNews.length > 0) await db.insert(dogNews).values(validDogNews);
 
+	// Salud de la manada: baños, vacunas y accesorios. Se descartan las filas
+	// cuyo perrito no exista, igual que con los comunicados.
+	const health = dogHealthSeed.filter((row) => validDogSlugs.has(row.dogSlug));
+	console.log(`Insertando ${health.length} bloques de salud…`);
+	if (health.length > 0) await db.insert(dogHealth).values(health);
+
+	const vaccines = dogVaccinesSeed
+		.filter((row) => validDogSlugs.has(row.dogSlug))
+		.map((row, index) => ({
+			dogSlug: row.dogSlug,
+			name: row.name,
+			applied: row.applied,
+			appliedDate: row.appliedDate,
+			recommendation: row.recommendation,
+			sortOrder: index
+		}));
+	console.log(`Insertando ${vaccines.length} vacunas…`);
+	if (vaccines.length > 0) await db.insert(dogVaccines).values(vaccines);
+
+	const accessories = dogAccessoriesSeed
+		.filter((row) => validDogSlugs.has(row.dogSlug))
+		.map((row, index) => ({
+			dogSlug: row.dogSlug,
+			label: row.label,
+			value: row.value,
+			provided: row.provided,
+			sortOrder: index
+		}));
+	console.log(`Insertando ${accessories.length} accesorios…`);
+	if (accessories.length > 0) await db.insert(dogAccessories).values(accessories);
+
 	console.log(`Insertando ${donationTiersSeed.length} niveles de donación…`);
 	await db.insert(donationTiers).values(
 		donationTiersSeed.map((tier, index) => ({
@@ -261,6 +302,9 @@ try {
 		UNION ALL SELECT 'news', count(*) FROM news
 		UNION ALL SELECT 'news_related_dogs', count(*) FROM news_related_dogs
 		UNION ALL SELECT 'dog_news', count(*) FROM dog_news
+		UNION ALL SELECT 'dog_health', count(*) FROM dog_health
+		UNION ALL SELECT 'dog_vaccines', count(*) FROM dog_vaccines
+		UNION ALL SELECT 'dog_accessories', count(*) FROM dog_accessories
 		UNION ALL SELECT 'donation_tiers', count(*) FROM donation_tiers
 		UNION ALL SELECT 'testimonials', count(*) FROM testimonials
 		UNION ALL SELECT 'bank_accounts', count(*) FROM bank_accounts

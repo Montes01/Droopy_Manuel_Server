@@ -57,6 +57,13 @@
       "when": 1792213336241,
       "tag": "0007_dog_news",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "8",
+      "when": 1792215584256,
+      "tag": "0008_broad_wolfsbane",
+      "breakpoints": true
     }
   ]
 }

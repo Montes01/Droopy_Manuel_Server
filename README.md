@@ -83,7 +83,7 @@ src/
   types.ts            Tipos de dominio (contrato con el frontend)
   db/
     index.ts          Conexión a PostgreSQL (Drizzle)
-    schema/           Esquema: 19 tablas y 12 enums
+    schema/           Esquema: 22 tablas y 12 enums
     seed.ts           Carga el contenido desde src/data/*.ts
   repositories/       Lectura y escritura contra la base
     mappers.ts        Fila de base → tipo de dominio
@@ -91,6 +91,7 @@ src/
     dogs.ts  shop.ts  news.ts  site.ts  orders.ts        (lectura)
     dogs-write.ts  shop-write.ts  news-write.ts  site-write.ts  (escritura)
     dog-news.ts  dog-news-write.ts  (comunicados por perrito)
+    dog-health.ts  dog-health-write.ts  (salud, vacunas y accesorios)
   auth/
     crypto.ts         bcrypt y tokens de sesión
     users.ts          Cuentas, sesiones, auditoría
@@ -153,8 +154,10 @@ Todos devuelven JSON. Los errores siguen el formato
 | GET | `/api/dogs/featured` | Destacados |
 | GET | `/api/dogs/pack?view=alive\|heaven` | Manada viva o en el cielo |
 | GET | `/api/dogs/news` | Todos los comunicados, más reciente primero |
+| GET | `/api/dogs/health` | Perfiles de salud de la manada (panel) |
 | GET | `/api/dogs/:slug` | Un perrito |
 | GET | `/api/dogs/:slug/news` | Comunicados de un perrito (404 si no existe) |
+| GET | `/api/dogs/:slug/health` | Salud, vacunas y accesorios del perrito (404 si no existe) |
 
 ### Tienda
 
@@ -237,6 +240,13 @@ curl -X POST http://localhost:3100/api/orders \
 | POST | `/api/admin/dogs/:slug/news` | editor | Crea un comunicado del perrito |
 | PATCH | `/api/admin/dogs/:slug/news/:id` | editor | Edita un comunicado |
 | DELETE | `/api/admin/dogs/:slug/news/:id` | **admin** | Borra un comunicado |
+| PUT | `/api/admin/dogs/:slug/health` | editor | Guarda baños y visita anual (1:1) |
+| POST | `/api/admin/dogs/:slug/vaccines` | editor | Crea una vacuna |
+| PATCH | `/api/admin/dogs/:slug/vaccines/:id` | editor | Edita una vacuna |
+| DELETE | `/api/admin/dogs/:slug/vaccines/:id` | **admin** | Borra una vacuna |
+| POST | `/api/admin/dogs/:slug/accessories` | editor | Crea un accesorio |
+| PATCH | `/api/admin/dogs/:slug/accessories/:id` | editor | Edita un accesorio |
+| DELETE | `/api/admin/dogs/:slug/accessories/:id` | **admin** | Borra un accesorio |
 | POST | `/api/admin/shop/categories` | editor | Crea una categoría |
 | PATCH | `/api/admin/shop/categories/:slug` | editor | Edita una categoría |
 | DELETE | `/api/admin/shop/categories/:slug` | **admin** | Borra (falla si tiene productos) |

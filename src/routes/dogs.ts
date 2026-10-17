@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import type { PackView } from '../types.js';
 import { getAllDogs, getDog, getFeaturedDogs, getPack } from '../repositories/dogs.js';
 import { getAllDogNews, getDogNews } from '../repositories/dog-news.js';
+import { getAllDogHealthProfiles, getDogHealthProfile } from '../repositories/dog-health.js';
 import { asyncHandler, badRequest, notFound, routeParam } from './helpers.js';
 
 const router = Router();
@@ -50,6 +51,18 @@ router.get(
 	})
 );
 
+/**
+ * GET /api/dogs/health — perfiles de salud de la manada (panel).
+ *
+ * Va antes de `/:slug` a propósito: si no, Express tomaría «health» como slug.
+ */
+router.get(
+	'/health',
+	asyncHandler(async (_req: Request, res: Response) => {
+		res.json(await getAllDogHealthProfiles());
+	})
+);
+
 /** GET /api/dogs/:slug/news — comunicados de un perrito concreto. */
 router.get(
 	'/:slug/news',
@@ -63,6 +76,22 @@ router.get(
 			return;
 		}
 		res.json(await getDogNews(slug));
+	})
+);
+
+/** GET /api/dogs/:slug/health — salud de un perrito concreto. */
+router.get(
+	'/:slug/health',
+	asyncHandler(async (req: Request, res: Response) => {
+		const slug = routeParam(req, res, 'slug');
+		if (slug === null) return;
+
+		const dog = await getDog(slug);
+		if (!dog) {
+			notFound(res, `No existe un perrito con el slug "${slug}".`);
+			return;
+		}
+		res.json(await getDogHealthProfile(slug));
 	})
 );
 

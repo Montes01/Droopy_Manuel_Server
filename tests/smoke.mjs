@@ -86,6 +86,27 @@ try {
 	const dog404 = await get('/api/dogs/no-existe');
 	check('GET /api/dogs/no-existe → 404', dog404.status === 404 && dog404.body.error === 'not_found');
 
+	// Salud del perrito: un solo GET trae baños, vacunas y accesorios.
+	const lunaHealth = await get('/api/dogs/luna/health');
+	check(
+		'GET /api/dogs/luna/health trae el perfil',
+		lunaHealth.status === 200 &&
+			lunaHealth.body.health?.lastBath === '2026-09-20' &&
+			lunaHealth.body.vaccines.length === 2 &&
+			lunaHealth.body.accessories.length === 3,
+		`health=${lunaHealth.body?.health?.lastBath} vacunas=${lunaHealth.body?.vaccines?.length} accesorios=${lunaHealth.body?.accessories?.length}`
+	);
+
+	const healthList = await get('/api/dogs/health');
+	check(
+		'GET /api/dogs/health lista los perfiles',
+		Array.isArray(healthList.body) && healthList.body.some((profile) => profile.dogSlug === 'luna'),
+		`len=${healthList.body?.length}`
+	);
+
+	const health404 = await get('/api/dogs/no-existe/health');
+	check('GET /api/dogs/no-existe/health → 404', health404.status === 404, `status=${health404.status}`);
+
 	const cats = await get('/api/shop/categories');
 	check('GET /api/shop/categories devuelve 6', Array.isArray(cats.body) && cats.body.length === 6, `len=${cats.body?.length}`);
 

@@ -31,7 +31,6 @@ export const dogs = pgTable(
 		goodWithDogs: boolean('good_with_dogs').notNull().default(false),
 		goodWithCats: boolean('good_with_cats').notNull().default(false),
 
-		vaccinated: boolean('vaccinated').notNull().default(false),
 		sterilized: boolean('sterilized').notNull().default(false),
 		status: dogStatusEnum('status').notNull(),
 

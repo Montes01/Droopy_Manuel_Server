@@ -155,7 +155,6 @@ try {
 		size: 'pequeño',
 		energy: 'juguetón',
 		goodWith: { kids: true, dogs: true, cats: false },
-		vaccinated: true,
 		sterilized: false,
 		status: 'en-adopcion',
 		arrival: '2026-01-15',
@@ -316,6 +315,120 @@ try {
 
 	const adminDeleteItem = await admin.request('DELETE', `/api/admin/shop/items/${itemSlug}`);
 	check('el admin borra el producto → 204', adminDeleteItem.status === 204, `status=${adminDeleteItem.status}`);
+
+	console.log('\n── Salud, vacunas y accesorios ──');
+
+	// Escribir salud sin sesión no puede pasar.
+	const anonHealth = await anon.request('PUT', `/api/admin/dogs/${slug}/health`, { lastBath: '2026-01-01' });
+	check('PUT health sin sesión → 401', anonHealth.status === 401, `status=${anonHealth.status}`);
+
+	// El bloque de salud admite fechas futuras (próximo baño, visita agendada).
+	const savedHealth = await admin.request('PUT', `/api/admin/dogs/${slug}/health`, {
+		lastBath: '2026-09-01',
+		nextBath: '2026-10-01',
+		vetVisitDone: true,
+		vetVisitDate: '2026-08-20'
+	});
+	check('PUT health guarda el bloque → 200', savedHealth.status === 200, `status=${savedHealth.status}`);
+	check('el próximo baño admite fecha futura', savedHealth.body?.nextBath === '2026-10-01', savedHealth.body?.nextBath);
+
+	// Es 1:1: el segundo PUT actualiza, no duplica.
+	const patchedHealth = await admin.request('PUT', `/api/admin/dogs/${slug}/health`, { lastBath: '2026-09-15' });
+	check('PUT health es 1:1 (actualiza)', patchedHealth.body?.lastBath === '2026-09-15', patchedHealth.body?.lastBath);
+	check(
+		'los campos no enviados se conservan',
+		patchedHealth.body?.nextBath === '2026-10-01',
+		patchedHealth.body?.nextBath
+	);
+
+	const badBath = await admin.request('PUT', `/api/admin/dogs/${slug}/health`, { lastBath: '15/09/2026' });
+	check('fecha de baño mal formada → 400', badBath.status === 400, `status=${badBath.status}`);
+
+	// Vacunas.
+	const vaccine = await admin.request('POST', `/api/admin/dogs/${slug}/vaccines`, {
+		name: 'Rabia',
+		applied: true,
+		appliedDate: '2026-03-01',
+		recommendation: 'Refuerzo anual.'
+	});
+	check('POST vacuna → 201', vaccine.status === 201, `status=${vaccine.status}`);
+	check(
+		'la vacuna guarda la recomendación libre',
+		vaccine.body?.recommendation === 'Refuerzo anual.',
+		vaccine.body?.recommendation
+	);
+	const vaccineId = vaccine.body?.id;
+
+	const badVaccine = await admin.request('POST', `/api/admin/dogs/${slug}/vaccines`, { applied: false });
+	check('vacuna sin nombre → 400', badVaccine.status === 400, `status=${badVaccine.status}`);
+
+	const editedVaccine = await admin.request('PATCH', `/api/admin/dogs/${slug}/vaccines/${vaccineId}`, {
+		applied: false
+	});
+	check('PATCH vacuna cambia el estado', editedVaccine.body?.applied === false, `${editedVaccine.body?.applied}`);
+
+	// Accesorios.
+	const accessory = await admin.request('POST', `/api/admin/dogs/${slug}/accessories`, {
+		label: 'Collar',
+		value: 'Talla S',
+		provided: true
+	});
+	check('POST accesorio → 201', accessory.status === 201, `status=${accessory.status}`);
+	const accessoryId = accessory.body?.id;
+
+	const badAccessory = await admin.request('POST', `/api/admin/dogs/${slug}/accessories`, { value: 'sin nombre' });
+	check('accesorio sin nombre → 400', badAccessory.status === 400, `status=${badAccessory.status}`);
+
+	// Lectura pública agregada (una sola llamada para el modal).
+	const publicHealth = await anon.request('GET', `/api/dogs/${slug}/health`);
+	check('GET /api/dogs/:slug/health responde', publicHealth.status === 200, `status=${publicHealth.status}`);
+	check('el perfil trae la vacuna', publicHealth.body?.vaccines?.length === 1, `n=${publicHealth.body?.vaccines?.length}`);
+	check(
+		'el perfil trae el accesorio',
+		publicHealth.body?.accessories?.length === 1,
+		`n=${publicHealth.body?.accessories?.length}`
+	);
+	check(
+		'el perfil trae el bloque de salud',
+		publicHealth.body?.health?.lastBath === '2026-09-15',
+		publicHealth.body?.health?.lastBath
+	);
+
+	const healthList = await anon.request('GET', '/api/dogs/health');
+	check('GET /api/dogs/health responde', healthList.status === 200 && Array.isArray(healthList.body));
+	check(
+		'el perrito de prueba aparece en la lista',
+		healthList.body?.some((profile) => profile.dogSlug === slug)
+	);
+
+	const health404 = await anon.request('GET', '/api/dogs/no-existe/health');
+	check('health de perrito inexistente → 404', health404.status === 404, `status=${health404.status}`);
+
+	// Roles: el editor edita vacunas pero no las borra.
+	const editorVaccine = await editor.request('PATCH', `/api/admin/dogs/${slug}/vaccines/${vaccineId}`, {
+		recommendation: 'Editada por el editor.'
+	});
+	check('el editor puede editar vacunas', editorVaccine.status === 200, `status=${editorVaccine.status}`);
+
+	const editorDeleteVaccine = await editor.request('DELETE', `/api/admin/dogs/${slug}/vaccines/${vaccineId}`);
+	check(
+		'el editor NO puede borrar vacunas → 403',
+		editorDeleteVaccine.status === 403,
+		`status=${editorDeleteVaccine.status}`
+	);
+
+	const adminDeleteVaccine = await admin.request('DELETE', `/api/admin/dogs/${slug}/vaccines/${vaccineId}`);
+	check('el admin borra la vacuna → 204', adminDeleteVaccine.status === 204, `status=${adminDeleteVaccine.status}`);
+
+	const adminDeleteAccessory = await admin.request('DELETE', `/api/admin/dogs/${slug}/accessories/${accessoryId}`);
+	check('el admin borra el accesorio → 204', adminDeleteAccessory.status === 204, `status=${adminDeleteAccessory.status}`);
+
+	// La auditoría guarda cada recurso con su propia entidad.
+	const healthAudit = await db
+		.select()
+		.from(adminAuditLog)
+		.where(eq(adminAuditLog.entity, 'dog_health'));
+	check('se auditó la salud', healthAudit.length > 0, `n=${healthAudit.length}`);
 
 	console.log('\n── Auditoría ──');
 

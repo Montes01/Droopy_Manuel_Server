@@ -37,7 +37,6 @@ export interface DogInput {
 	size?: Dog['size'];
 	energy?: Dog['energy'];
 	goodWith?: Partial<Dog['goodWith']>;
-	vaccinated?: boolean;
 	sterilized?: boolean;
 	status?: DogStatus;
 	arrival?: string;
@@ -105,7 +104,6 @@ function buildValues(input: DogInput, partial: boolean) {
 		values.goodWithDogs = Boolean(input.goodWith.dogs);
 		values.goodWithCats = Boolean(input.goodWith.cats);
 	}
-	if (input.vaccinated !== undefined) values.vaccinated = Boolean(input.vaccinated);
 	if (input.sterilized !== undefined) values.sterilized = Boolean(input.sterilized);
 	if (input.featured !== undefined) values.featured = Boolean(input.featured);
 	if (input.photo !== undefined) values.photo = input.photo || null;
