@@ -6,6 +6,7 @@
  */
 export * from './enums.js';
 export * from './dogs.js';
+export * from './dog-news.js';
 export * from './project.js';
 export * from './shop.js';
 export * from './orders.js';

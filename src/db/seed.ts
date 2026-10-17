@@ -24,11 +24,13 @@ import {
 	testimonials as testimonialsSeed
 } from '../data/content.js';
 import { dogs as dogsSeed } from '../data/dogs.js';
+import { dogNews as dogNewsSeed } from '../data/dog-news.js';
 import { news as newsSeed } from '../data/news.js';
 import { shopCategories as categoriesSeed, shopItems as itemsSeed } from '../data/shop.js';
 import {
 	bankAccounts,
 	contactChannels,
+	dogNews,
 	donationTargets,
 	donationTiers,
 	dogs,
@@ -44,6 +46,7 @@ import {
 /** Borra el contenido antes de sembrar. Los pedidos y usuarios no se tocan. */
 async function reset(): Promise<void> {
 	// El orden respeta las claves foráneas: primero lo que depende de otros.
+	await db.delete(dogNews);
 	await db.delete(newsRelatedDogs);
 	await db.delete(news);
 	await db.delete(donationTargets);
@@ -159,6 +162,21 @@ async function seed(): Promise<void> {
 	console.log(`Insertando ${related.length} relaciones noticia-perrito…`);
 	if (related.length > 0) await db.insert(newsRelatedDogs).values(related);
 
+	// Comunicados por perrito: se descartan los de slugs que no existan.
+	const validDogNews = dogNewsSeed
+		.filter((item) => validDogSlugs.has(item.dogSlug))
+		.map((item) => ({
+			dogSlug: item.dogSlug,
+			kind: item.kind,
+			title: item.title,
+			body: item.body,
+			date: item.date,
+			photo: item.photo,
+			urgent: item.urgent ?? false
+		}));
+	console.log(`Insertando ${validDogNews.length} comunicados…`);
+	if (validDogNews.length > 0) await db.insert(dogNews).values(validDogNews);
+
 	console.log(`Insertando ${donationTiersSeed.length} niveles de donación…`);
 	await db.insert(donationTiers).values(
 		donationTiersSeed.map((tier, index) => ({
@@ -242,6 +260,7 @@ try {
 		UNION ALL SELECT 'shop_variants', count(*) FROM shop_variants
 		UNION ALL SELECT 'news', count(*) FROM news
 		UNION ALL SELECT 'news_related_dogs', count(*) FROM news_related_dogs
+		UNION ALL SELECT 'dog_news', count(*) FROM dog_news
 		UNION ALL SELECT 'donation_tiers', count(*) FROM donation_tiers
 		UNION ALL SELECT 'testimonials', count(*) FROM testimonials
 		UNION ALL SELECT 'bank_accounts', count(*) FROM bank_accounts

@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import type { PackView } from '../types.js';
 import { getAllDogs, getDog, getFeaturedDogs, getPack } from '../repositories/dogs.js';
+import { getAllDogNews, getDogNews } from '../repositories/dog-news.js';
 import { asyncHandler, badRequest, notFound, routeParam } from './helpers.js';
 
 const router = Router();
@@ -34,6 +35,34 @@ router.get(
 			return;
 		}
 		res.json(await getPack(view));
+	})
+);
+
+/**
+ * GET /api/dogs/news — todos los comunicados, más reciente primero.
+ *
+ * Va antes de `/:slug` a propósito: si no, Express tomaría «news» como slug.
+ */
+router.get(
+	'/news',
+	asyncHandler(async (_req: Request, res: Response) => {
+		res.json(await getAllDogNews());
+	})
+);
+
+/** GET /api/dogs/:slug/news — comunicados de un perrito concreto. */
+router.get(
+	'/:slug/news',
+	asyncHandler(async (req: Request, res: Response) => {
+		const slug = routeParam(req, res, 'slug');
+		if (slug === null) return;
+
+		const dog = await getDog(slug);
+		if (!dog) {
+			notFound(res, `No existe un perrito con el slug "${slug}".`);
+			return;
+		}
+		res.json(await getDogNews(slug));
 	})
 );
 

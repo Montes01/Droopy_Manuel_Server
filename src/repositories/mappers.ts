@@ -9,6 +9,7 @@
 import type {
 	BankAccount,
 	Dog,
+	DogNews,
 	DonationTarget,
 	DonationTier,
 	NewsItem,
@@ -25,6 +26,7 @@ import type {
 import type {
 	BankAccountRow,
 	ContactChannelRow,
+	DogNewsRow,
 	DogRow,
 	DonationTargetRow,
 	DonationTierRow,
@@ -106,6 +108,23 @@ export function toShopItem(row: ShopItemRow, variants: ShopVariantRow[]): ShopIt
 		stock: row.stock
 	};
 	if (row.featured) item.featured = true;
+	return item;
+}
+
+export function toDogNews(row: DogNewsRow): DogNews {
+	const item: DogNews = {
+		id: row.id,
+		dogSlug: row.dogSlug,
+		kind: row.kind,
+		title: row.title,
+		body: row.body,
+		date: row.date,
+		photo: row.photo
+	};
+
+	// Opcional: solo se incluye cuando es true, como `featured` en toDog.
+	if (row.urgent) item.urgent = true;
+
 	return item;
 }
 

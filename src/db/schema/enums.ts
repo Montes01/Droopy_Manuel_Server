@@ -1,5 +1,10 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { DOG_STATUSES, NEWS_CATEGORY_SLUGS, PROJECT_SECTION_KINDS } from '../../types.js';
+import {
+	DOG_NEWS_KINDS,
+	DOG_STATUSES,
+	NEWS_CATEGORY_SLUGS,
+	PROJECT_SECTION_KINDS
+} from '../../types.js';
 
 /**
  * Enums del dominio.
@@ -38,6 +43,9 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 ]);
 
 export const newsCategoryEnum = pgEnum('news_category', NEWS_CATEGORY_SLUGS);
+
+/** Tipo de comunicado en el perfil de un perrito. */
+export const dogNewsKindEnum = pgEnum('dog_news_kind', DOG_NEWS_KINDS);
 
 export const paymentMethodEnum = pgEnum('payment_method', [
 	'transferencia',

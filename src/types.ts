@@ -71,6 +71,44 @@ export interface Dog {
 /** Vista de la manada: vivos o en el cielo. */
 export type PackView = 'alive' | 'heaven';
 
+// ------------------------------------------------ Comunicados de la manada
+
+/**
+ * Tipos de comunicado que la fundación publica en el perfil de un perrito.
+ *
+ * Fuente única del dominio: el enum de la base (`dogNewsKindEnum`), la
+ * validación de escritura (`dog-news-write.ts`) y las etiquetas visibles del
+ * frontend derivan de aquí.
+ */
+export const DOG_NEWS_KINDS = [
+	'general',
+	'examen',
+	'tratamiento',
+	'cirugia',
+	'recuperacion'
+] as const;
+
+export type DogNewsKind = (typeof DOG_NEWS_KINDS)[number];
+
+/**
+ * Un comunicado de un perrito: la novedad que ve la comunidad en su perfil
+ * («exámenes pendientes», «tratamiento en curso»…).
+ *
+ * `id` es interno: la web pública lo ignora, pero el panel lo necesita para
+ * editar y borrar un comunicado concreto.
+ */
+export interface DogNews {
+	id: number;
+	dogSlug: Slug;
+	kind: DogNewsKind;
+	title: string;
+	body: string;
+	date: ISODate; // YYYY-MM-DD; ordena el feed: más reciente primero
+	photo: PhotoPath;
+	/** true = necesita ayuda urgente (se resalta en el perfil). */
+	urgent?: boolean;
+}
+
 // ------------------------------------------------------- Página de proyecto
 
 /**

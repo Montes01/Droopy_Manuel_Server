@@ -83,13 +83,14 @@ src/
   types.ts            Tipos de dominio (contrato con el frontend)
   db/
     index.ts          Conexión a PostgreSQL (Drizzle)
-    schema/           Esquema: 17 tablas y 10 enums
+    schema/           Esquema: 19 tablas y 12 enums
     seed.ts           Carga el contenido desde src/data/*.ts
   repositories/       Lectura y escritura contra la base
     mappers.ts        Fila de base → tipo de dominio
     validation.ts     Reglas compartidas de validación
     dogs.ts  shop.ts  news.ts  site.ts  orders.ts        (lectura)
     dogs-write.ts  shop-write.ts  news-write.ts  site-write.ts  (escritura)
+    dog-news.ts  dog-news-write.ts  (comunicados por perrito)
   auth/
     crypto.ts         bcrypt y tokens de sesión
     users.ts          Cuentas, sesiones, auditoría
@@ -151,7 +152,9 @@ Todos devuelven JSON. Los errores siguen el formato
 | GET | `/api/dogs` | Toda la manada |
 | GET | `/api/dogs/featured` | Destacados |
 | GET | `/api/dogs/pack?view=alive\|heaven` | Manada viva o en el cielo |
+| GET | `/api/dogs/news` | Todos los comunicados, más reciente primero |
 | GET | `/api/dogs/:slug` | Un perrito |
+| GET | `/api/dogs/:slug/news` | Comunicados de un perrito (404 si no existe) |
 
 ### Tienda
 
@@ -231,6 +234,9 @@ curl -X POST http://localhost:3100/api/orders \
 | PATCH | `/api/admin/dogs/:slug` | editor | Edita campos sueltos |
 | PUT | `/api/admin/dogs/order` | editor | Reordena la manada |
 | DELETE | `/api/admin/dogs/:slug` | **admin** | Borra un perrito |
+| POST | `/api/admin/dogs/:slug/news` | editor | Crea un comunicado del perrito |
+| PATCH | `/api/admin/dogs/:slug/news/:id` | editor | Edita un comunicado |
+| DELETE | `/api/admin/dogs/:slug/news/:id` | **admin** | Borra un comunicado |
 | POST | `/api/admin/shop/categories` | editor | Crea una categoría |
 | PATCH | `/api/admin/shop/categories/:slug` | editor | Edita una categoría |
 | DELETE | `/api/admin/shop/categories/:slug` | **admin** | Borra (falla si tiene productos) |
