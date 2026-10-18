@@ -161,6 +161,9 @@ export function toDogNews(row: DogNewsRow): DogNews {
 	// Opcional: solo se incluye cuando es true, como `featured` en toDog.
 	if (row.urgent) item.urgent = true;
 
+	// Opcional: solo los tratamientos tienen fecha de cierre.
+	if (row.endDate) item.endDate = row.endDate;
+
 	return item;
 }
 

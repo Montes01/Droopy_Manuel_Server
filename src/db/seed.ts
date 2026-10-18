@@ -181,6 +181,7 @@ async function seed(): Promise<void> {
 			title: item.title,
 			body: item.body,
 			date: item.date,
+			endDate: item.endDate ?? null,
 			photo: item.photo,
 			urgent: item.urgent ?? false
 		}));

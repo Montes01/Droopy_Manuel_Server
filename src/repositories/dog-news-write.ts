@@ -9,6 +9,7 @@ import {
 	ValidationError,
 	requireBooleanish,
 	requireEnum,
+	requireNullableISODateAny,
 	requireString
 } from './validation.js';
 
@@ -26,6 +27,8 @@ export interface DogNewsInput {
 	title?: string;
 	body?: string;
 	date?: string;
+	/** Fecha final: solo se aplica cuando `kind` es `tratamiento`. */
+	endDate?: string | null;
 	photo?: string | null;
 	urgent?: boolean;
 }
@@ -54,6 +57,18 @@ function buildValues(input: DogNewsInput, partial: boolean) {
 			throw new ValidationError('El campo "date" debe tener el formato YYYY-MM-DD.');
 		}
 		values.date = date;
+	}
+
+	// La fecha final solo aplica a un tratamiento. Se guarda cuando el
+	// comunicado queda de tipo `tratamiento`; si el tipo es otro, se limpia.
+	if (input.endDate !== undefined) {
+		const endDate = requireNullableISODateAny(input.endDate, 'endDate');
+		if (endDate !== null && values.kind !== undefined && values.kind !== 'tratamiento') {
+			throw new ValidationError('La fecha final solo aplica a comunicados de tipo tratamiento.');
+		}
+		values.endDate = endDate;
+	} else if (values.kind !== undefined && values.kind !== 'tratamiento') {
+		values.endDate = null;
 	}
 
 	if (input.photo !== undefined) values.photo = input.photo || null;

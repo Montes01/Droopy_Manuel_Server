@@ -26,6 +26,8 @@ export const dogNews = pgTable(
 		body: text('body').notNull(),
 		/** Fecha ISO (YYYY-MM-DD). Ordena el feed: más reciente primero. */
 		date: varchar('date', { length: 10 }).notNull(),
+		/** Fecha final del tratamiento (YYYY-MM-DD). null = sin cierre. */
+		endDate: varchar('end_date', { length: 10 }),
 		photo: varchar('photo', { length: 255 }),
 		urgent: boolean('urgent').notNull().default(false),
 

@@ -33,6 +33,7 @@ export const dogNews: Omit<DogNews, 'id'>[] = [
 		title: 'Tratamiento en curso',
 		body: 'Thor está en tratamiento por una infección en la piel. Necesita medicación diaria por quince días más. Cualquier ayuda con los medicamentos se agradece.',
 		date: '2026-10-12',
+		endDate: '2026-10-27',
 		photo: null,
 		urgent: true
 	},
@@ -105,6 +106,7 @@ export const dogNews: Omit<DogNews, 'id'>[] = [
 		title: 'Tratamiento para la anemia',
 		body: 'Chiquis llegó con anemia. Está con suplementos y alimentación especial; necesita controles cada semana. Toda ayuda suma.',
 		date: '2026-10-09',
+		endDate: '2026-11-09',
 		photo: null,
 		urgent: true
 	},

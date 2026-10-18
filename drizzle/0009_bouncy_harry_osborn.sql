@@ -1,0 +1,1 @@
+ALTER TABLE "dog_news" ADD COLUMN "end_date" varchar(10);

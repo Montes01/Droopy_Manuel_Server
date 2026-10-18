@@ -103,6 +103,11 @@ export interface DogNews {
 	title: string;
 	body: string;
 	date: ISODate; // YYYY-MM-DD; ordena el feed: más reciente primero
+	/**
+	 * Fecha final. Solo la usan los comunicados de tipo `tratamiento`: marca
+	 * cuándo termina (o terminó) el tratamiento. Ausente = sin fecha de cierre.
+	 */
+	endDate?: ISODate;
 	photo: PhotoPath;
 	/** true = necesita ayuda urgente (se resalta en el perfil). */
 	urgent?: boolean;
