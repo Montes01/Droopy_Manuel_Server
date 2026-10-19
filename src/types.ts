@@ -340,6 +340,19 @@ export interface NewsPage {
 	hasMore: boolean;
 }
 
+/**
+ * Filtros opcionales del feed de noticias.
+ *
+ * Los aplica el backend para poder seguir paginando el scroll infinito sobre
+ * el conjunto filtrado, en vez de traer todo y recortar en el navegador.
+ */
+export interface NewsFilter {
+	/** Búsqueda de texto libre: título, bajada, cuerpo y etiquetas. */
+	q?: string;
+	/** Categoría exacta. */
+	category?: NewsCategory;
+}
+
 // ------------------------------------------------------- Donaciones y sitio
 
 export type PaymentMethod = 'transferencia' | 'billetera' | 'internacional';

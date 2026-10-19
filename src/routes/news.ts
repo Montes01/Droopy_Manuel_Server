@@ -5,7 +5,8 @@ import {
 	getNewsItem,
 	getNewsPage
 } from '../repositories/news.js';
-import { asyncHandler, badRequest, notFound, routeParam } from './helpers.js';
+import { NEWS_CATEGORY_SLUGS, type NewsCategory, type NewsFilter } from '../types.js';
+import { asyncHandler, badRequest, notFound, queryParam, routeParam } from './helpers.js';
 
 const router = Router();
 
@@ -17,17 +18,31 @@ router.get('/categories', (_req: Request, res: Response) => {
 });
 
 /**
- * GET /api/news?offset=0&limit=6 — noticias paginadas.
+ * GET /api/news?offset=0&limit=6&q=texto&category=rescate — noticias filtradas.
  *
- * Sin parámetros devuelve el feed completo. Con `offset`/`limit` devuelve el
- * trozo y `hasMore`, que es lo que usa el scroll infinito.
+ * Sin parámetros devuelve el feed completo. Con `offset`/`limit`, o con algún
+ * filtro (`q`, `category`), devuelve el trozo y `hasMore`, que es lo que usa el
+ * scroll infinito.
  */
 router.get(
 	'/',
 	asyncHandler(async (req: Request, res: Response) => {
+		const q = queryParam(req, 'q');
+		const rawCategory = queryParam(req, 'category');
+
+		let category: NewsCategory | undefined;
+		if (rawCategory) {
+			if (!(NEWS_CATEGORY_SLUGS as readonly string[]).includes(rawCategory)) {
+				badRequest(res, `La categoría "${rawCategory}" no es válida.`);
+				return;
+			}
+			category = rawCategory as NewsCategory;
+		}
+
+		const filter: NewsFilter = { q, category };
 		const hasPaging = req.query.offset !== undefined || req.query.limit !== undefined;
 
-		if (!hasPaging) {
+		if (!hasPaging && !q && !category) {
 			res.json(await getAllNews());
 			return;
 		}
@@ -44,7 +59,7 @@ router.get(
 			return;
 		}
 
-		res.json(await getNewsPage(offset, limit));
+		res.json(await getNewsPage(offset, limit, filter));
 	})
 );
 

@@ -1,7 +1,7 @@
-import { asc, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, inArray, or, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { news, newsRelatedDogs } from '../db/schema/index.js';
-import type { NewsCategory, NewsItem, NewsPage } from '../types.js';
+import type { NewsCategory, NewsFilter, NewsItem, NewsPage } from '../types.js';
 import { toNewsItem } from './mappers.js';
 
 /**
@@ -25,6 +25,37 @@ export const NEWS_CATEGORIES: { slug: NewsCategory; label: string; emoji: string
 /** Más reciente primero. */
 const NEWS_ORDER = [desc(news.date), desc(news.id)];
 
+/**
+ * Condición SQL del filtro del feed, o `undefined` si no hay nada que filtrar.
+ *
+ * La búsqueda recorre título, bajada, etiquetas y cuerpo sin distinguir
+ * mayúsculas. Etiquetas y cuerpo son arrays de texto: se aplanan con
+ * `array_to_string` para poder buscar dentro de cada elemento.
+ */
+function filterCondition(filter: NewsFilter = {}): SQL | undefined {
+	const conditions: SQL[] = [];
+
+	if (filter.category) {
+		conditions.push(eq(news.category, filter.category));
+	}
+
+	const q = filter.q?.trim();
+	if (q) {
+		const like = `%${q}%`;
+		const match = or(
+			ilike(news.title, like),
+			ilike(news.excerpt, like),
+			sql`array_to_string(${news.tags}, ' ') ILIKE ${like}`,
+			sql`array_to_string(${news.body}, ' ') ILIKE ${like}`
+		);
+		if (match) conditions.push(match);
+	}
+
+	if (conditions.length === 0) return undefined;
+	if (conditions.length === 1) return conditions[0];
+	return and(...conditions);
+}
+
 async function relatedByNews(slugs: string[]): Promise<Map<string, string[]>> {
 	const grouped = new Map<string, string[]>();
 	if (slugs.length === 0) return grouped;
@@ -44,8 +75,12 @@ async function relatedByNews(slugs: string[]): Promise<Map<string, string[]>> {
 }
 
 /** Feed completo, más reciente primero. */
-export async function getAllNews(): Promise<NewsItem[]> {
-	const rows = await db.select().from(news).orderBy(...NEWS_ORDER);
+export async function getAllNews(filter: NewsFilter = {}): Promise<NewsItem[]> {
+	const rows = await db
+		.select()
+		.from(news)
+		.where(filterCondition(filter))
+		.orderBy(...NEWS_ORDER);
 	const related = await relatedByNews(rows.map((row) => row.slug));
 	return rows.map((row) => toNewsItem(row, related.get(row.slug) ?? []));
 }
@@ -72,13 +107,20 @@ export async function getNewsByCategory(category: NewsCategory): Promise<NewsIte
 /**
  * Página del feed para el scroll infinito.
  *
- * `offset` es cuántos elementos ya se mostraron. Se cuenta el total para saber
- * si quedan más, en vez de traer todo el feed.
+ * `offset` es cuántos elementos ya se mostraron. Se cuenta el total del
+ * conjunto filtrado para saber si quedan más, en vez de traer todo el feed.
  */
-export async function getNewsPage(offset = 0, limit = 6): Promise<NewsPage> {
+export async function getNewsPage(
+	offset = 0,
+	limit = 6,
+	filter: NewsFilter = {}
+): Promise<NewsPage> {
+	const where = filterCondition(filter);
+
 	const rows = await db
 		.select()
 		.from(news)
+		.where(where)
 		.orderBy(...NEWS_ORDER)
 		.limit(limit)
 		.offset(offset);
@@ -86,7 +128,10 @@ export async function getNewsPage(offset = 0, limit = 6): Promise<NewsPage> {
 	const related = await relatedByNews(rows.map((row) => row.slug));
 	const items = rows.map((row) => toNewsItem(row, related.get(row.slug) ?? []));
 
-	const [counted] = await db.select({ total: count() }).from(news);
+	const [counted] = await db
+		.select({ total: count() })
+		.from(news)
+		.where(where);
 	const total = counted?.total ?? 0;
 	return { items, hasMore: offset + items.length < total };
 }
